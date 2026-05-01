@@ -15,6 +15,8 @@ Markers:
 | Create | Foundation [hard] | Andesite/brass/steam progression |
 | Sable | Physics library [hard] | Required by Aeronautics. Intrusive — confirm compatibility per addon |
 | Create: Aeronautics | Logistics layer [hard] | The mod the server is named for |
+| Aeronautics Camera Sync | Aeronautics camera follow [opt] | Aeronautics addon |
+| Aeronautics Exposure | Aeronautics camera exposure [opt] | Aeronautics addon |
 | Create: Steam 'n' Rails | Rail variety [hard] | NeoForge port |
 | Create: Crafts and Additions | IE compatibility [hard] | Bridges Create and IE |
 | Create Deco | Decorative [opt] | |
@@ -50,6 +52,7 @@ Markers:
 | William Wythers' Overhauled Overworld * | Additional biome variety [hard] | |
 | Distant Horizons | Render-distance extension [opt] | Performance critical for our world size |
 | Structurify | Structure spawn control [hard] | |
+| More Density Functions | Adds `moredfs:x`, `moredfs:z`, `moredfs:sin`, `moredfs:cos`, `moredfs:mod`, etc. [hard] | Required for the toroidal climate density functions; vanilla 1.21.1 has no primitive that reads world X or Z. |
 | Noisium (Forked) | Worldgen perf [lib] | |
 
 ## Travel and survival
