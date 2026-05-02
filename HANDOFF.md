@@ -33,6 +33,8 @@ What does NOT exist yet:
 - Custom ores DROPPED as progression. Repurposed as 8 Patchouli quest-key lore items.
 - Mod scope shrunk to: book + advancements + lore items + portal-ignition-disable + recipe-disables.
 - No modifications to Aeronautics recipes.
+- Ecliptic Seasons replaces Serene Seasons + Plus. Homeostatic stays. Bridge via KubeJS.
+- KubeJS + Create KubeJS + Ponder for KubeJS added to modlist. May collapse companion-mod scope to scripts + textures.
 
 ## Next action
 

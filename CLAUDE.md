@@ -70,6 +70,17 @@ The active modlist is in `design/mod-list.md`. Hard-core anchors:
 - **PureSuffering** (configurable invasions)
 - **Sodium + Lithium + Distant Horizons** (performance)
 - **Patchouli** (companion mod's data-driven guidebook)
+- **KubeJS + Create KubeJS + Ponder for KubeJS** (scripting layer — see note below)
+
+### KubeJS changes the build calculus
+
+KubeJS is in the modlist. This means:
+- Custom items with right-click handlers may not need a Java mod — KubeJS can register them.
+- Event handlers (block ignition, player events, etc.) may be KubeJS scripts, not Java.
+- The Ecliptic Seasons → Homeostatic temperature bridge is a KubeJS script.
+- Recipe modifications, advancement triggers, and small mechanics live in KubeJS.
+
+**Before scaffolding the Java companion mod, verify which features actually need Java vs. which are KubeJS-feasible.** If most features are KubeJS, the companion mod may collapse to "datapacks + scripts + textures" with no Java compilation step. The mod README still describes a Java mod approach as a fallback. Investigate before committing either direction.
 
 ## What we are building
 

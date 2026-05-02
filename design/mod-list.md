@@ -16,7 +16,7 @@ Markers:
 | Sable | Physics library [hard] | Required by Aeronautics. Intrusive — confirm compatibility per addon |
 | Create: Aeronautics | Logistics layer [hard] | The mod the server is named for |
 | Aeronautics Camera Sync | Aeronautics camera follow [opt] | Aeronautics addon |
-| Aeronautics Exposure | Aeronautics camera exposure [opt] | Aeronautics addon |
+| Exposure | Custom camera exposure [opt] | |
 | Create: Steam 'n' Rails | Rail variety [hard] | NeoForge port |
 | Create: Crafts and Additions | IE compatibility [hard] | Bridges Create and IE |
 | Create Deco | Decorative [opt] | |
@@ -54,14 +54,14 @@ Markers:
 | Structurify | Structure spawn control [hard] | |
 | More Density Functions | Adds `moredfs:x`, `moredfs:z`, `moredfs:sin`, `moredfs:cos`, `moredfs:mod`, etc. [hard] | Required for the toroidal climate density functions; vanilla 1.21.1 has no primitive that reads world X or Z. |
 | Noisium (Forked) | Worldgen perf [lib] | |
+| Ore Veines+ | More control over Ore Vein generation | |
 
 ## Travel and survival
 
 | Mod | Role | Notes |
 |-----|------|-------|
 | Waystones | Discoverable + buildable waystones [hard] | Configurable warpRequirements |
-| Serene Seasons | Seasons [hard] | |
-| Serene Seasons Plus | Seasons enhancement [opt] | |
+| Ecliptic Seasons | Seasons [hard] | |
 | Homeostatic | Thirst + temperature [hard] | |
 | Torches Burn Out | Torch burnout [hard] | |
 | Better Days | Day-length config [opt] | |
@@ -104,6 +104,9 @@ Markers:
 | Kotlin for Forge | Kotlin runtime [lib] | |
 | Jade | Block info HUD [opt] | |
 | JEI | Recipe lookup [hard] | |
+| KubeJS | JS Integration | |
+| KubeJS Create | Create JS Integration | |
+| Ponder of KubeJS | Custom Ponder Scenes | |
 
 ## Companion mod (we are writing this)
 

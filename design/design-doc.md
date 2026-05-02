@@ -97,8 +97,9 @@ Implementation via Waystones (BlayTheNinth) + custom `warpRequirements` config +
 
 ## Survival layer
 
-- Seasons (Serene Seasons) — foliage cycles, crop fertility, ambient temperature shifts.
-- Thirst + temperature (Homeostatic) — drink water, wear appropriate clothing for biome. Integrates with Serene Seasons.
+- Seasons (Ecliptic Seasons) — 24 solar terms across 4 seasons. Accumulating snow on dirt/grass/leaves/rooftops in cold terms, regional rainfall by biome, foggy weather, biome color shifts. KubeJS bindings exposed.
+- Thirst + temperature (Homeostatic) — drink water, wear appropriate clothing for biome. Wet-bulb globe temperature math, body temp regulation via armor insulation.
+- Ecliptic→Homeostatic bridge — KubeJS script applies global temperature offset to Homeostatic based on current solar term. Without this, Homeostatic temperature stays seasonally flat.
 - Torch burnout — configurable burn time, optional re-ignition with flint and steel.
 - Better farming (Farmer's Delight) — meaningful engagement track for non-Create-pilled players.
 
