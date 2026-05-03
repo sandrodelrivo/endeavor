@@ -6745,7 +6745,6 @@
                                               "invert": {
                                                   "type": "minecraft:biome",
                                                   "biome_is": [
-                                                      "terralith:comment_dont_generate_strips_here",
                                                       "terralith:alpha_islands",
                                                       "terralith:alpha_islands_winter",
                                                       "terralith:lavender_forest",
