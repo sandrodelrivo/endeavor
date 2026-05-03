@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:flat_cache",
+  "argument": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "moredfs:power",
+      "base": {
+        "type": "moredfs:sin",
+        "argument": {
+          "type": "minecraft:mul",
+          "argument1": 0.0001471975511966,
+          "argument2": {
+            "type": "moredfs:x"
+          }
+        }
+      },
+      "exponent": 1.0
+    },
+    "argument2": {
+      "type": "minecraft:mul",
+      "argument1": 0.2,
+      "argument2": {
+        "type": "minecraft:shifted_noise",
+        "noise": "minecraft:vegetation",
+        "shift_x": "minecraft:shift_x",
+        "shift_y": 0.0,
+        "shift_z": "minecraft:shift_z",
+        "xz_scale": 0.25,
+        "y_scale": 0.0
+      }
+    }
+  }
+}

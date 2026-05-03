@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#endeavour:extreme_hot",
+  "features": "immersivepetroleum:reservoir",
+  "step": "underground_ores"
+}

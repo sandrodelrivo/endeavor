@@ -1,0 +1,6 @@
+{
+    "pack": {
+        "pack_format": 48,
+        "description": "Smoke test: vanilla biome_modifier remove+add for ore restriction. Pure vanilla ores and biomes, no Endeavour climate, no moredfs. Drop into a vanilla NeoForge 1.21.1 instance with NO other mods loaded."
+    }
+}

@@ -76,7 +76,7 @@ Markers:
 | YUNG's Better Dungeons | Dungeon variety [hard] | |
 | Dungeons and Taverns (Base + extensions) | Structure overhaul [hard] | Ancient City, Desert Temple, Jungle Temple, Nether Fortress, Ocean Monument, Stronghold, Swamp Hut, Woodland Mansion |
 | YUNG's API | Required for YUNG mods [lib] | |
-| PureSuffering | Configurable invasions [hard] | Configure for trigger-only |
+| Undead Nights - Zombie Horde Nights | Configurable invasions [hard] | Configure for trigger-only |
 
 ## Communication and aesthetic
 

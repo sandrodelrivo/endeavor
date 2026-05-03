@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "terralith:volcanic_crater",
+        "terralith:volcanic_peaks",
+        "terralith:caldera",
+        "terralith:cave/thermal_caves",
+        "terralith:white_cliffs"
+    ]
+}

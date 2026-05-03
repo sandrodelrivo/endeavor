@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:mul",
+  "argument1": "minecraft:overworld/far_waste_blend",
+  "argument2": {
+    "type": "minecraft:y_clamped_gradient",
+    "from_y": 52,
+    "to_y": 128,
+    "from_value": 0.72,
+    "to_value": -0.38
+  }
+}

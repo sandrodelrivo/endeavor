@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#endeavour:mesa_family",
+  "features": "create:zinc_ore",
+  "step": "underground_ores"
+}
