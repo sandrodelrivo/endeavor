@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:mushroom_stem",
+	"minecraft:gravel",
+    "minecraft:moss_block"
+  ]
+}
