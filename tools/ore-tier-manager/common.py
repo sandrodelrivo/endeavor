@@ -76,7 +76,7 @@ STEP_INDEX: dict[str, int] = {name: i for i, name in enumerate(GENERATION_STEPS)
 def all_biome_files() -> list[Path]:
     out: list[Path] = []
     for sub in ("minecraft/worldgen/biome", "terralith/worldgen/biome",
-                "wythers/worldgen/biome"):
+                "wythers/worldgen/biome", "endeavour/worldgen/biome"):
         d = DATAPACK_ROOT / sub
         if d.exists():
             out.extend(sorted(d.rglob("*.json")))
