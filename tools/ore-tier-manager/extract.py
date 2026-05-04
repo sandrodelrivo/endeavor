@@ -1,13 +1,20 @@
-"""Bootstrap biome_overrides.yaml from the current biome JSONs + tag JSONs.
+"""Bootstrap biome_overrides.yaml from current biome JSONs + tag JSONs + catalog.
 
-One-shot. Reads every biome JSON in the datapack and every endeavour
-tag JSON, factors per-(tag, step) feature intersections into
-`#endeavour:<tag>` entries in biome_overrides.yaml, and emits the
-per-biome diffs as biome-id keys. After this runs, `apply.py` should
-reproduce the existing biome JSONs feature-list-equivalent.
+For each tag:
+  - Look at the biomes in the tag.
+  - Find every catalog ore that's currently in EVERY one of those biomes
+    at some step (intersection per step).
+  - Write that as `#endeavour:<tag>: {<step>: {@add: [...]}}` in
+    biome_overrides.yaml.
 
-The xlsx is NEVER read. Tag JSONs are the sole source of truth for
-biome -> tag membership.
+That's it. No biome-id keys. Non-ore features stay in biome JSONs.
+
+The first apply.py run after extract will:
+  - Strip the listed catalog ores from biome JSONs.
+  - Generate biome_modifier files that re-inject them via tag tags.
+  - Net: the post-migration worldgen should be feature-list-equivalent
+    to current state (you'll be able to verify via git diff and a
+    fresh-world test).
 
 Usage:
     python extract.py            # writes config/biome_overrides.yaml
@@ -23,154 +30,97 @@ from collections import OrderedDict
 from pathlib import Path
 
 from common import (
+    BIOME_OVERRIDES_PATH,
     CONFIG_DIR,
-    DATAPACK_ROOT,
+    ENDEAVOUR_BIOME_MODIFIER_DIR,
     GENERATION_STEPS,
+    STEP_INDEX,
     all_biome_files,
     biome_id_from_path,
     biome_to_tags,
     load_all_endeavour_tags,
+    load_ore_catalog,
     yaml_dump,
 )
 
 
-# Tags whose biome lists are large enough that intersection-based extraction
-# is useful. Other tags (cross-cutting, often small) get empty entries that
-# the user fills in manually as they migrate ore distribution into tags.
-INTERSECTION_TAGS_DEFAULT = ("tier_1", "tier_2", "tier_4")
-
-
 BIOME_OVERRIDES_HEADER = """\
-# Biome-overrides: the only place where ore lists live.
+# Tag -> ore assignments. The single source of truth for ore distribution.
 #
-# Two kinds of keys:
+# Keys:
 #   "#endeavour:<tag>"            -- applies to every biome listed in
 #                                    `data/endeavour/tags/worldgen/biome/<tag>.json`.
-#   "<namespace>:<biome>"         -- applies to a single biome on top of
-#                                    its tag overrides.
+#                                    Biome-id keys are NOT supported in this
+#                                    architecture; per-biome ore exceptions
+#                                    require putting the biome in a tag of
+#                                    its own.
 #
 # Per-step ops:
-#   "@set":   [...]               -- replace whatever was inherited from tags
+#   "@set":   [...]               -- replace whatever was inherited from earlier tags
 #   "@add":   [...]               -- append (dedup)
 #   "@remove":[...]               -- drop by ID
-# A bare list is shorthand for @set.
+# Use @add for tag entries; @set will silently wipe earlier tags' contributions.
 #
-# Resolution per biome:
-#   features = (apply each tag's overrides in tag-name sort order)
-#              then (apply biome-id-specific overrides)
+# Resolution per biome (at apply time):
+#   biome's ores = union over (tags this biome is in, sorted) of
+#                  (each tag's ore list per step)
 #
 # Steps follow vanilla 1.21.1 GenerationStep.Decoration order:
 #   raw_generation, lakes, local_modifications, underground_structures,
 #   surface_structures, strongholds, underground_ores, underground_decoration,
 #   fluid_springs, vegetal_decoration, top_layer_modification.
 #
-# IE secondary ores (immersiveengineering:bauxite/lead/nickel/silver/deep_nickel),
-# createnuclear:lead_ore, and create:striated_ores_overworld are intentionally
-# absent: their tag home is undecided. To enable, add them under the
-# appropriate tag entry.
-#
-# The xlsx (design/tier-map.xlsx) is documentation only; this tool never
-# reads or writes it.
+# Only ores in config/ore_catalog.yaml are valid here. Non-catalog
+# features get silently dropped at apply time and are flagged by validate.py.
 """
 
 
 def load_existing_features() -> dict[str, list[list[str]]]:
     feats: dict[str, list[list[str]]] = {}
     for f in all_biome_files():
-        biome_id = biome_id_from_path(f)
-        data = json.loads(f.read_text(encoding="utf-8"))
-        feats[biome_id] = [list(s) for s in data.get("features", [])]
+        feats[biome_id_from_path(f)] = [
+            list(s) for s in json.loads(f.read_text(encoding="utf-8")).get("features", [])
+        ]
     return feats
 
 
-def first_appearance_order(biome_lists: list[list[str]]) -> list[str]:
-    """Stable ordering of features by first-appearance across the input lists."""
-    out: list[str] = []
-    seen: set[str] = set()
-    for lst in biome_lists:
-        for f in lst:
-            if f not in seen:
-                seen.add(f)
-                out.append(f)
-    return out
-
-
-def compute_tag_intersection(
+def per_tag_unassigned_union(
     biomes_in_tag: list[tuple[str, list[list[str]]]],
+    catalog: set[str],
+    already_assigned: dict[str, dict[int, set[str]]],
 ) -> dict[str, list[str]]:
-    """Per step: features present in EVERY biome in the tag.
+    """Per step: UNION of catalog ores across biomes in this tag, minus
+    ores already claimed by a previously-processed tag.
 
-    Result keyed by step name; only steps with non-empty intersection
-    are included.
+    `already_assigned[biome_id][step_idx]` tracks per-biome ores already
+    covered by an earlier tag. The caller updates this after each tag's
+    claim so subsequent tags don't re-claim, which prevents NeoForge
+    from add_features-stacking the same ore from multiple modifiers
+    (which would multi-spawn at runtime).
+
+    Why union and not intersection? Intersection would silently drop any
+    ore that doesn't appear in EVERY biome of the tag. With current
+    Terralith-shaped data, that loses ~750 ore-instances. Union is more
+    forgiving: a tag claims any catalog ore present in any of its biomes
+    that isn't already covered. Some biomes may gain ores they didn't
+    previously have (which the user will see in the apply diff and can
+    adjust by removing the ore from the tag in the GUI).
     """
     out: dict[str, list[str]] = {}
     for i, step in enumerate(GENERATION_STEPS):
-        per_step_lists = [feats[i] if i < len(feats) else [] for _, feats in biomes_in_tag]
-        if not per_step_lists:
-            continue
-        intersection = set(per_step_lists[0])
-        for lst in per_step_lists[1:]:
-            intersection &= set(lst)
-        if not intersection:
-            continue
-        ordering = first_appearance_order(per_step_lists)
-        out[step] = [f for f in ordering if f in intersection]
-    return out
-
-
-def compute_biome_diff(
-    biome_features: list[list[str]],
-    baseline: dict[str, list[str]],
-) -> dict[str, dict]:
-    """Diff one biome's features against its tag-derived baseline.
-
-    Returns step_name -> {"@add": [...], "@remove": [...]} (only present
-    when non-empty). Empty diffs return {}.
-    """
-    out: dict[str, dict] = {}
-    for i, step in enumerate(GENERATION_STEPS):
-        biome_step = biome_features[i] if i < len(biome_features) else []
-        base_step = baseline.get(step, [])
-        adds = [f for f in biome_step if f not in base_step]
-        removes = [f for f in base_step if f not in biome_step]
-        block: dict = {}
-        if adds:
-            block["@add"] = adds
-        if removes:
-            block["@remove"] = removes
-        if block:
-            out[step] = block
-    return out
-
-
-def compute_biome_set(biome_features: list[list[str]]) -> dict[str, dict]:
-    """For biomes with no tag baseline: emit a full @set per non-empty step."""
-    out: dict[str, dict] = {}
-    for i, step in enumerate(GENERATION_STEPS):
-        biome_step = biome_features[i] if i < len(biome_features) else []
-        if biome_step:
-            out[step] = {"@set": list(biome_step)}
-    return out
-
-
-def union_baselines(biome_id: str,
-                    biome_to_tags_map: dict[str, list[str]],
-                    tag_baselines: dict[str, dict[str, list[str]]],
-                    ) -> dict[str, list[str]]:
-    """Compute the per-step baseline a biome inherits from all its tags.
-
-    Tags are applied in alphabetical order (matches resolve_biomes).
-    A feature added by an earlier tag survives later tag passes unless
-    a later tag explicitly removes it (which extract doesn't generate).
-    """
-    out: dict[str, list[str]] = {}
-    for tag in sorted(biome_to_tags_map.get(biome_id, [])):
-        tag_steps = tag_baselines.get(tag, {})
-        for step, feats in tag_steps.items():
-            cur = out.setdefault(step, [])
-            for f in feats:
-                if f not in cur:
-                    cur.append(f)
+        union: set[str] = set()
+        first_appearance: list[str] = []
+        seen: set[str] = set()
+        for biome_id, feats in biomes_in_tag:
+            biome_step = feats[i] if i < len(feats) else []
+            covered = already_assigned.get(biome_id, {}).get(i, set())
+            for f in biome_step:
+                if f in catalog and f not in covered and f not in seen:
+                    seen.add(f)
+                    first_appearance.append(f)
+                    union.add(f)
+        if first_appearance:
+            out[step] = first_appearance
     return out
 
 
@@ -178,87 +128,172 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force", action="store_true",
                         help="overwrite existing biome_overrides.yaml")
-    parser.add_argument("--intersection-tags", nargs="*",
-                        default=list(INTERSECTION_TAGS_DEFAULT),
-                        help=f"tags to factor by intersection. "
-                             f"Default: {INTERSECTION_TAGS_DEFAULT}")
     args = parser.parse_args()
 
+    catalog = load_ore_catalog()
     feats = load_existing_features()
-    on_disk_ids = set(feats)
-    tags = load_all_endeavour_tags(on_disk_ids=on_disk_ids)
-    b2t = biome_to_tags(tags)
+    on_disk = set(feats)
+    tags = load_all_endeavour_tags(on_disk_ids=on_disk)
 
-    # Drop biomes from tag membership that aren't actually on disk
+    # Validate tag membership against on-disk biomes; drop stale entries
     for tag, biomes in tags.items():
-        missing = biomes - on_disk_ids
-        if missing:
-            print(f"WARN: tag '{tag}' lists {len(missing)} biome(s) not on "
-                  f"disk: {sorted(missing)[:3]}{'...' if len(missing) > 3 else ''}",
-                  file=sys.stderr)
-            tags[tag] = biomes & on_disk_ids
+        stale = biomes - on_disk
+        if stale:
+            print(f"NOTE: tag '{tag}' has {len(stale)} biomes not on disk; "
+                  f"dropping for extract.", file=sys.stderr)
+            tags[tag] = biomes & on_disk
 
-    # Compute intersection-based baseline for selected tags
-    tag_baselines: dict[str, dict[str, list[str]]] = {}
-    for tag in args.intersection_tags:
-        if tag not in tags:
-            print(f"NOTE: --intersection-tag '{tag}' not present, skipping",
-                  file=sys.stderr)
-            continue
+    bo: OrderedDict = OrderedDict()
+    # Track per-(biome, step) which ores have already been assigned to a tag.
+    # The next tag's intersection only considers ores not yet claimed.
+    already_assigned: dict[str, dict[int, set[str]]] = {
+        b: {i: set() for i in range(len(GENERATION_STEPS))} for b in feats
+    }
+
+    # Path A: seed modded ores from LEGACY endeavour biome_modifiers (the
+    # 06_*-10_* files that inject zinc/uranium/thorium/oil). These ores
+    # aren't in any biome JSON (mod biome_modifiers were neutralized),
+    # so the union pass below would otherwise miss them.
+    #
+    # Skip files using our tool-generated naming convention (`<tag>__<step>.json`).
+    # If we re-ingested those, second-run extract would resurrect any ore
+    # we'd previously deleted via the GUI - the tool would never converge.
+    seeded_from_modifiers: list[str] = []
+    if ENDEAVOUR_BIOME_MODIFIER_DIR.exists():
+        for mf in sorted(ENDEAVOUR_BIOME_MODIFIER_DIR.glob("*.json")):
+            if "__" in mf.stem:
+                continue  # tool-generated file; biome_overrides.yaml is authoritative
+            try:
+                data = json.loads(mf.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            if data.get("type") != "neoforge:add_features":
+                continue
+            biomes_field = data.get("biomes", "")
+            step = data.get("step")
+            features_field = data.get("features", [])
+            if (not isinstance(biomes_field, str)
+                    or not biomes_field.startswith("#endeavour:")
+                    or step not in STEP_INDEX):
+                continue
+            tag = biomes_field[len("#endeavour:"):]
+            features = ([features_field] if isinstance(features_field, str)
+                        else list(features_field))
+            features = [f for f in features if f in catalog]
+            if not features:
+                continue
+            entry = bo.setdefault(f"#endeavour:{tag}", OrderedDict())
+            step_block = entry.setdefault(step, {"@add": []})
+            adds = step_block.setdefault("@add", [])
+            step_idx = STEP_INDEX[step]
+            for f in features:
+                if f not in adds:
+                    adds.append(f)
+                    seeded_from_modifiers.append(f"{mf.name} -> {tag}/{step}/{f}")
+            # Mark these ores as covered for biomes in the tag
+            for b in tags.get(tag, set()):
+                if b in already_assigned:
+                    already_assigned[b][step_idx].update(features)
+    if seeded_from_modifiers:
+        print(f"NOTE: seeded {len(seeded_from_modifiers)} ore(s) from existing "
+              f"endeavour biome_modifiers:", file=sys.stderr)
+        for s in seeded_from_modifiers:
+            print(f"  {s}", file=sys.stderr)
+
+    # Path B: tag-driven intersection extraction, processing tags in order
+    # of decreasing biome-set size. Each tag claims ores common to its
+    # biomes that no earlier tag has already covered. This partitions
+    # catalog ores across tags (no double-counting -> no NeoForge multi-add).
+    tag_order = sorted(tags, key=lambda t: (-len(tags[t]), t))
+    for tag in tag_order:
         biomes_in_tag = [(b, feats[b]) for b in sorted(tags[tag]) if b in feats]
         if not biomes_in_tag:
             continue
-        baseline = compute_tag_intersection(biomes_in_tag)
-        if baseline:
-            tag_baselines[tag] = baseline
+        per_step = per_tag_unassigned_union(
+            biomes_in_tag, catalog, already_assigned)
+        if not per_step:
+            continue
+        entry = bo.setdefault(f"#endeavour:{tag}", OrderedDict())
+        for step, ores in per_step.items():
+            step_block = entry.setdefault(step, {"@add": []})
+            adds = step_block.setdefault("@add", [])
+            for f in ores:
+                if f not in adds:
+                    adds.append(f)
+            step_idx = STEP_INDEX[step]
+            for b, _ in biomes_in_tag:
+                already_assigned[b][step_idx].update(ores)
 
-    # Build biome_overrides
-    bo: OrderedDict = OrderedDict()
-    # Tag entries first, sorted (matches resolution order). Wrap each step's
-    # list in `{@add: [...]}` so multiple tags compose additively rather
-    # than the later tag's bare list silently @set-wiping earlier tags'
-    # contributions during resolution.
-    for tag in sorted(tag_baselines):
-        bo[f"#endeavour:{tag}"] = {
-            step: {"@add": list(feats)}
-            for step, feats in tag_baselines[tag].items()
-        }
+    # Report ores that won't be covered for biomes that ARE in some tag.
+    # Untagged biomes are skipped by apply.py and keep their existing ores,
+    # so reporting them here is noise.
+    tagged_biome_set = {b for b in feats if b in {bb for ids in tags.values() for bb in ids}}
+    leftover: dict[str, dict[str, list[str]]] = {}
+    for biome_id, feats_arr in feats.items():
+        if biome_id not in tagged_biome_set:
+            continue
+        for i, step_arr in enumerate(feats_arr):
+            biome_ores = {f for f in step_arr if f in catalog}
+            covered = already_assigned[biome_id][i]
+            missing = biome_ores - covered
+            if missing:
+                step_name = GENERATION_STEPS[i] if i < len(GENERATION_STEPS) else f"step{i}"
+                leftover.setdefault(biome_id, {}).setdefault(step_name, []).extend(sorted(missing))
+    if leftover:
+        n_biomes = len(leftover)
+        n_total = sum(len(s) for v in leftover.values() for s in v.values())
+        print(f"\nWARN: {n_total} ore-instance(s) across {n_biomes} biome(s) "
+              f"are NOT covered by any tag (they currently exist in the "
+              f"biome JSON but no tag's full membership shares them). "
+              f"They'll be lost when apply.py strips the biome JSONs.",
+              file=sys.stderr)
+        # Show first few examples
+        shown = 0
+        for biome_id, steps in sorted(leftover.items()):
+            for step, ores in steps.items():
+                for f in ores:
+                    print(f"  {biome_id} [{step}] {f}", file=sys.stderr)
+                    shown += 1
+                    if shown >= 15:
+                        break
+                if shown >= 15:
+                    break
+            if shown >= 15:
+                break
+        if n_total > 15:
+            print(f"  ... and {n_total - 15} more", file=sys.stderr)
+        print(f"  Fix: assign these biomes to a tag that includes the ore, "
+              f"or add a singleton tag for the exception.", file=sys.stderr)
 
-    # Per-biome diffs/sets
-    for biome_id in sorted(feats):
-        baseline = union_baselines(biome_id, b2t, tag_baselines)
-        if baseline:
-            diff = compute_biome_diff(feats[biome_id], baseline)
-        else:
-            diff = compute_biome_set(feats[biome_id])
-        if diff:
-            bo[biome_id] = diff
-
-    bo_path = CONFIG_DIR / "biome_overrides.yaml"
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    if bo_path.exists() and not args.force:
-        print(f"ERROR: {bo_path} already exists. Use --force to overwrite.",
+    if BIOME_OVERRIDES_PATH.exists() and not args.force:
+        print(f"ERROR: {BIOME_OVERRIDES_PATH} exists. Use --force to overwrite.",
               file=sys.stderr)
         return 2
 
-    yaml_dump(bo_path, bo, header=BIOME_OVERRIDES_HEADER)
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    yaml_dump(BIOME_OVERRIDES_PATH, bo, header=BIOME_OVERRIDES_HEADER)
 
-    # Drop tier_templates.yaml if it's still hanging around from the old design
+    # Drop tier_templates.yaml if present (legacy)
     tt_path = CONFIG_DIR / "tier_templates.yaml"
     if tt_path.exists():
         tt_path.unlink()
-        print(f"Removed legacy {tt_path.relative_to(CONFIG_DIR.parent)}",
-              file=sys.stderr)
+        print(f"Removed legacy {tt_path.name}", file=sys.stderr)
 
     # Summary
-    print(f"Wrote {bo_path.relative_to(CONFIG_DIR.parent)}: "
-          f"{len(bo)} entries "
-          f"({sum(1 for k in bo if k.startswith('#'))} tag, "
-          f"{sum(1 for k in bo if not k.startswith('#'))} biome)")
-    for tag, baseline in tag_baselines.items():
-        print(f"  #endeavour:{tag}: {sum(len(v) for v in baseline.values())} "
-              f"features across {len(baseline)} step(s)")
+    print(f"Wrote {BIOME_OVERRIDES_PATH.relative_to(CONFIG_DIR.parent)}: "
+          f"{len(bo)} tag entries")
+    for key, steps in bo.items():
+        total = sum(len(extract_features_for_summary(b)) for b in steps.values())
+        print(f"  {key}: {total} ores across {len(steps)} step(s)")
     return 0
+
+
+def extract_features_for_summary(block) -> list[str]:
+    if isinstance(block, list):
+        return list(block)
+    if isinstance(block, dict):
+        return list(block.get("@add", [])) + list(block.get("@set", []))
+    return []
 
 
 if __name__ == "__main__":

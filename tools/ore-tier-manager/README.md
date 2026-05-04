@@ -1,13 +1,8 @@
 # ore-tier-manager
 
-Regenerate the `features` array of every overworld biome JSON in
-`datapack-worldgen/zzz_endeavour_worldgen/` from one declarative file:
-`config/biome_overrides.yaml`.
-
-Architecture is tag-only. There's no separate "tier" concept; tiers are
-just tags whose biome lists happen to be (by convention) mutually
-exclusive. Edit the YAML or use the GUI, run `apply.py`, repack the
-datapack zip, drop into a fresh world.
+The tool is the **sole** source of truth for ore distribution. It strips
+catalog-listed ores from biome JSONs and re-injects them via NeoForge
+biome_modifier files generated from `config/biome_overrides.yaml`.
 
 ## Setup
 
@@ -23,197 +18,187 @@ pip install pyyaml
 
 ```
 tools/ore-tier-manager/
-  common.py                 # shared lib (resolution, tag loading, JSON formatting)
-  extract.py                # one-shot bootstrap: biome JSONs -> seed YAML
-  apply.py                  # main: YAML -> biome JSONs
-  validate.py               # post-apply sanity checks
-  gui.py                    # Tk editor for the YAML + tag JSONs
+  common.py
+  extract.py                  # one-shot bootstrap (biome JSONs -> YAML)
+  apply.py                    # main: YAML -> stripped biome JSONs + biome_modifiers
+  validate.py                 # post-apply sanity checks
+  gui.py                      # Tk editor
   config/
-    biome_overrides.yaml    # tag and biome-id ore lists
+    ore_catalog.yaml          # placed_feature IDs the tool treats as ores
+    biome_overrides.yaml      # tag -> ore lists
 ```
 
 ## Daily use
 
 ```
-python apply.py             # write biome JSONs
+python apply.py             # strip + write biome_modifiers
 python apply.py --dry-run   # report changes; no writes
-python apply.py --diff      # per-biome additions/removals
-python validate.py          # check the result
-python gui.py               # Tk editor for tags, ores, biome assignments
+python apply.py --diff      # per-biome ore-strip diff + biome_modifier list
+python validate.py
+python gui.py
 ```
 
-## Resolution model
+## How it works
 
-Every overworld biome JSON's `features` array is computed from
-`biome_overrides.yaml` like this:
+There are three pieces of state:
 
-```
-features = []
-for tag in sorted(tags this biome belongs to):           # alphabetical
-    apply biome_overrides["#endeavour:" + tag] to features
-apply biome_overrides[biome_id] to features              # biome-id last
-```
+1. **`config/ore_catalog.yaml`** - the explicit list of placed_feature IDs
+   the tool considers ores. Anything not in this file is "terrain /
+   structure / decoration / vegetation" and the tool never touches it.
 
-A biome's tag membership is read from the tag JSON files at
-`data/endeavour/tags/worldgen/biome/*.json`. A biome can be in zero,
-one, or many tags. Resolution is union semantics; multiple tags
-compose additively.
+2. **`config/biome_overrides.yaml`** - tag -> ore lists. Keys are
+   `#endeavour:<tag>`. Each entry says which ores the tool injects into
+   biomes carrying that tag. Per-biome exceptions don't exist: if one
+   biome needs an ore none of its tag-mates do, put the biome in a
+   singleton tag.
 
-### Per-step ops
+3. **`data/endeavour/tags/worldgen/biome/*.json`** - biome -> tag
+   membership. Edit through the GUI's right pane.
 
-A step block in `biome_overrides.yaml` is either a bare list (= `@set`)
-or a dict with `@`-prefixed ops:
+`apply.py` does two things every run:
 
-| Op | Meaning |
-|----|---------|
-| `@set: [...]` | replace whatever was inherited from earlier tags |
-| `@add: [...]` | append features (deduped against current list) |
-| `@remove: [...]` | drop features by ID |
+- **Strips** every catalog feature from every tagged biome's JSON
+  `features` array. Untagged biomes are left alone.
+- **Writes** `data/endeavour/neoforge/biome_modifier/<tag>__<step>.json`
+  files using NeoForge's `add_features` mechanism. Each carries the
+  ore list for one (tag, step) combination. The biome_modifier
+  directory is fully tool-managed: stale files are deleted on every
+  run.
 
-Tag entries should almost always use `@add`. Bare lists or `@set` on a
-tag entry will silently wipe contributions from any tag that comes
-earlier in the alphabet, which is rarely what you want.
+At world load, NeoForge applies the biome_modifiers, layering ores back
+onto biomes that match each tag's `#endeavour:<tag>` selector. Net
+runtime state: biome JSON terrain features (in original order) +
+ores from tag-matching biome_modifiers.
 
-`@set` is fine on biome-id entries, where it lets a single biome
-overrule its tag-derived baseline entirely.
+## Resolution: ores partition across tags (no double-count)
 
-### Generation steps
+The tool guarantees each ore appears in **at most one** tag's
+biome_modifier per biome. Otherwise NeoForge's `add_features` would
+stack duplicates and multi-spawn at runtime.
 
-Use vanilla 1.21.1 step names as keys inside each step block. Order
-matches `GenerationStep.Decoration`:
+Bootstrap algorithm (`extract.py`):
+1. Seed modded ores from existing endeavour biome_modifiers (zinc to
+   `mesa_family`, uranium/oil to `extreme_cold`, etc.).
+2. Process tags in order of biome-set size (largest first). For each
+   tag, claim every catalog ore present in any of its biomes that
+   isn't already covered by a previously-processed tag. Ores assigned
+   in step 1 are already covered for their biomes.
 
-```
-raw_generation, lakes, local_modifications, underground_structures,
-surface_structures, strongholds, underground_ores, underground_decoration,
-fluid_springs, vegetal_decoration, top_layer_modification
-```
+Tier tags (~38-53 biomes each) thus claim the bulk of vanilla ores.
+Smaller cross-cutting tags (`mesa_family`, `extreme_cold`, etc.) end
+up carrying just their tag-specific ores.
 
-### Per-biome ordering
+UNION semantics across each tag means some biomes may gain ores they
+didn't previously have (e.g. tier_4 biomes that lacked emerald_ore now
+get it because the tag claims emerald_ore once for all members). Use
+`apply.py --diff` to inspect; correct in the GUI by removing ores from
+overly-broad tags or splitting a tag.
 
-Within a step, features are emitted in this order:
+## Untagged biomes
 
-1. Features that were already in the existing biome JSON, in their
-   original order. Preserves inter-run stability and avoids
-   FeatureSorter cycles where none existed.
-2. Net-new features, in the order they appear after resolution.
+A biome that's in zero endeavour tags is left untouched by `apply.py`:
+its JSON is not stripped, no biome_modifier targets it, and Terralith's
+default ores remain. Add it to a tag in the GUI to bring it under tool
+management.
+
+Currently untagged: `minecraft:deep_dark`, `terralith:alpha_islands`,
+`terralith:alpha_islands_winter`, `terralith:ancient_sands`,
+`terralith:mirage_isles`, `terralith:skylands_*` (4 variants),
+`terralith:warped_mesa`.
 
 ## What it edits, what it leaves alone
 
 **Edits:**
 
 - `config/biome_overrides.yaml` (via the GUI or hand)
-- The `features` array of every biome JSON
-- The endeavour tag JSONs at `data/endeavour/tags/worldgen/biome/`
-  (membership, when you assign biomes via the GUI)
+- `data/endeavour/tags/worldgen/biome/*.json` (membership, via GUI)
+- The `features` array of every tagged biome JSON (strips catalog ores)
+- `data/endeavour/neoforge/biome_modifier/*.json` (fully tool-managed)
 
 **Doesn't touch:**
 
-- `design/tier-map.xlsx`. Pure documentation; the tool neither reads
-  nor writes it. Keep it in sync manually if you care about the
-  human-facing tier overview.
+- `design/tier-map.xlsx`. Pure documentation.
+- `config/ore_catalog.yaml`. Edit by hand to add a new ore the tool
+  should manage.
 - Climate density functions
   (`data/minecraft/worldgen/noise_settings/overworld.json`,
   `density_function/overworld/far_waste_*.json`).
-- The 15 `neoforge:none` mod biome_modifier shadows
-  (Create, Create Nuclear, Create New Age, IE, IP).
-- The 5 active endeavour biome_modifiers
-  (`06_add_zinc_ore_to_mesa_family.json` etc.) that currently inject
-  zinc/uranium/thorium/oil via tags. See [Migration path](#migration-path)
-  to fold these into biome JSONs instead.
+- The 15 `neoforge:none` mod biome_modifier shadows under
+  `data/<modid>/neoforge/biome_modifier/`. These remain inert
+  permanently; the tool generates its replacements.
+- Untagged biomes' JSONs.
 - The companion mod scaffolding under `mod/`.
 
 ## GUI
 
 `python gui.py` opens a three-pane Tk window:
 
-- **Left:** every endeavour tag (`tier_1`, `tier_2`, `tier_4`,
-  `mesa_family`, `extreme_cold`, ...). Add a new tag or delete an
-  existing one.
-- **Middle:** features that the selected tag adds at the chosen
-  generation step (default: `underground_ores`). Picker dialog supports
-  filter + custom-ID typing for adding mod ores not yet in any biome.
-- **Right:** biomes that belong to the selected tag. Add/remove biome
-  membership; the picker labels each candidate biome with its other
-  tag memberships so you can see what you're combining.
+- **Left:** every endeavour tag. Add / delete tags.
+- **Middle:** ores in the selected tag at the chosen generation step.
+  Multi-select removal with Ctrl/Shift. Non-catalog entries are flagged
+  `[NOT IN CATALOG]` (apply.py drops them silently otherwise).
+- **Right:** biomes that belong to the selected tag. Add a biome by
+  picking from the list (annotated with each biome's other tags).
 
-The "Generation step" dropdown at the top changes which step the
-middle pane edits. Use `fluid_springs` for IP reservoirs,
-`local_modifications` for amethyst geodes, etc.
+The "+ Add ore(s)" picker is multi-select and groups the catalog by
+namespace (vanilla / create / immersiveengineering / etc.). "Select
+all visible" + filter combo lets you assign 50 ores in three clicks.
+A custom-ID textbox at the bottom takes one ore-ID per line, but unless
+you also add the ID to `ore_catalog.yaml`, apply.py will drop it.
 
-Save writes both the YAML and the tag JSONs. Apply runs `apply.py
---diff` and shows the resulting biome-JSON changes in a popup; nothing
-touches the biome JSONs until you press Apply.
+The Generation step dropdown changes which step the middle pane
+edits. Most ores live at `underground_ores`. Use `local_modifications`
+for amethyst/emerald geodes; `fluid_springs` is also possible (IP
+reservoir was historically there before mods moved it).
+
+## Catalog
+
+`config/ore_catalog.yaml` lists every placed_feature ID the tool treats
+as an ore. The bootstrap catalog covers vanilla, WWOO biome-locked
+variants, Create / Create Nuclear / Create New Age / Immersive
+Engineering / Immersive Petroleum. Edit it to:
+
+- Add a new modded ore the tool should manage. Save → reload the GUI →
+  the ore appears in the picker.
+- Remove an ore from tool management (the tool stops stripping it from
+  biome JSONs; current biome_modifiers stop including it on next apply).
+
+Categorization is for human readability; the tool reads it as a flat
+union.
 
 ## Bootstrap (one-time)
 
 ```
 python extract.py            # writes config/biome_overrides.yaml
-python apply.py --dry-run    # should report 0 changes
-python validate.py           # should report OK
+python apply.py --diff       # review the migration; biome JSONs lose ores
+python validate.py
 ```
 
-The seed YAML factors per-tag feature intersections (for `tier_1`,
-`tier_2`, `tier_4`) into `#endeavour:tier_X` entries and emits each
-biome's diff against its tags' union as a biome-id key. Cross-cutting
-tags like `mesa_family` start empty rules-wise; their biome lists are
-unchanged.
+The bootstrap migrates from the old "ores embedded in biome JSONs +
+06_*-10_* biome_modifiers" architecture to the catalog-driven one. It:
 
-`extract.py` refuses to overwrite existing YAML unless given `--force`.
+- Writes `biome_overrides.yaml` capturing current ore distribution
+  partitioned across tags.
+- Strips catalog ores from biome JSONs.
+- Replaces the legacy `06_*-10_*` biome_modifiers with
+  `<tag>__<step>.json` files.
 
-## Migration path: folding endeavour biome_modifiers into biome JSONs
-
-The currently-active endeavour biome_modifiers
-(`06_add_zinc_ore_to_mesa_family.json`,
-`07_add_uranium_ore_to_extreme_cold.json`,
-`08_add_thorium_ore_to_extreme_hot.json`,
-`09_add_oil_to_extreme_cold.json`,
-`10_add_oil_to_extreme_hot.json`) inject modded ores via biome tags.
-These work, but route ore distribution through two systems
-(biome_modifier + biome JSON) instead of one.
-
-To consolidate everything into biome JSONs:
-
-1. In the GUI, select the corresponding tag (e.g. `mesa_family`),
-   set the step dropdown to `underground_ores`, and add the
-   ore (e.g. `create:zinc_ore`). For oil add it under `fluid_springs`.
-2. Save and Apply. Confirm the biome JSONs gained the ore via the
-   diff popup.
-3. Replace the biome_modifier file with a `neoforge:none` shadow:
-   ```json
-   {"type": "neoforge:none"}
-   ```
-4. Repack the zip, test in a fresh world. The ore should still spawn
-   (now from the biome JSON) and should NOT spawn anywhere outside
-   the tag.
-
-## Pending ore decisions
-
-These ores are currently disabled (no biome references them). Their
-tag home is undecided; add them to the appropriate tag entry when
-you're ready:
-
-- `immersiveengineering:bauxite` (aluminum)
-- `immersiveengineering:lead`
-- `immersiveengineering:nickel`
-- `immersiveengineering:silver`
-- `immersiveengineering:deep_nickel`
-- `createnuclear:lead_ore` (IE has lead too; pick one)
-- `create:striated_ores_overworld` (decorative limestone/scoria
-  variants; could go on a universal tag if you want them everywhere)
+Inspect the biome-JSON diffs in `git status` before committing. The
+migration is destructive: biomes lose their old per-biome ore lists,
+gain ores common to their tag-mates. Tweak in the GUI as needed.
 
 ## Validation
 
 `validate.py` checks:
 
-- Every biome JSON parses.
-- No biome has more than 11 generation steps.
-- Every feature ID has a `namespace:path` form.
-- Reports unfamiliar namespaces (likely typos). Whitelisted ones are
-  `minecraft, terralith, wythers, create, createnuclear, create_new_age,
-  immersiveengineering, immersivepetroleum, endeavour, aether,
-  deep_aether, lithosphere`.
-- Warns (does not fail) on cross-biome FeatureSorter ordering cycles.
-  Vanilla 1.21.1 tolerates the cycles that the existing Terralith data
-  ships with; per-biome ordering preservation prevents new cycles.
-- Warns when tag JSONs reference biome IDs that don't exist on disk
-  (likely stale entries with wrong cave/ paths).
+- Every biome JSON parses; no biome has more than 11 generation steps.
+- No tagged biome's JSON still contains a catalog ore (apply drift).
+- Every feature in `biome_overrides.yaml` is in the catalog (anything
+  else gets silently dropped at apply time).
+- No biome-id keys in `biome_overrides.yaml` (legacy from pre-catalog
+  architecture; the catalog-driven tool ignores them).
+- Tag JSONs reference only on-disk biomes.
+- No orphan endeavour biome_modifier files (besides legacy `06_*-10_*`,
+  which `apply.py` will replace).
+- Cross-biome FeatureSorter ordering cycles (warning only; the existing
+  Terralith data has some).

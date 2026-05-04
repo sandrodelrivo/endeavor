@@ -1,0 +1,98 @@
+# Ore catalog: every placed_feature ID the tool treats as an "ore".
+#
+# Anything in this file is the tool's business. Anything not in this file
+# is treated as terrain / structure / decoration / vegetation and is left
+# alone in biome JSONs.
+#
+# `apply.py` does two things on each run:
+#   1. Strips every catalog feature from every biome JSON's `features` array.
+#      Biome JSONs are expected to be inert post-migration: they hold terrain
+#      and decoration only, no ores.
+#   2. Generates `data/endeavour/neoforge/biome_modifier/<tag>__<step>.json`
+#      files from biome_overrides.yaml, using NeoForge's `neoforge:add_features`
+#      mechanism to inject ores into tag-tagged biomes.
+#
+# Edit this file to add a new ore the tool should manage. After editing,
+# re-run apply.py - any biome JSON still containing the new ore will be
+# cleaned, and the ore becomes available to assign in the GUI.
+#
+# Categorization is for human readability only; the tool reads them as a
+# flat union.
+
+vanilla:
+  - minecraft:ore_coal_upper
+  - minecraft:ore_coal_lower
+  - minecraft:ore_copper
+  - minecraft:ore_copper_large
+  - minecraft:ore_iron_upper
+  - minecraft:ore_iron_middle
+  - minecraft:ore_iron_small
+  - minecraft:ore_gold
+  - minecraft:ore_gold_lower
+  - minecraft:ore_gold_extra        # badlands extra-gold variant
+  - minecraft:ore_redstone
+  - minecraft:ore_redstone_lower
+  - minecraft:ore_diamond
+  - minecraft:ore_diamond_medium
+  - minecraft:ore_diamond_large
+  - minecraft:ore_diamond_buried
+  - minecraft:ore_lapis
+  - minecraft:ore_lapis_buried
+  - minecraft:ore_emerald
+  # Geodes spawn resource crystals; treated as ores so tags can gate them.
+  - minecraft:amethyst_geode
+
+terralith:
+  - terralith:cave/fungal/ore_coal_extra
+  - terralith:mountains/emerald/emerald_geode
+
+# WWOO biome-locked variants. Lava-volcanic is excluded - it spawns lava
+# pockets, not a mineable resource.
+wwoo:
+  - wythers:ores/ore_coal_windswept
+  - wythers:ores/ore_iron_windswept
+  - wythers:ores/ore_redstone_windswept
+  - wythers:ores/ore_diamond_volcanic
+  - wythers:ores/ore_gold_volcanic
+
+create:
+  - create:zinc_ore
+
+create_new_age:
+  - create_new_age:thorium_ore
+  - create_new_age:magnetite_block
+
+createnuclear:
+  - createnuclear:uranium_ore
+  - createnuclear:lead_ore
+
+# IE secondary ores. Tier home is undecided per design/ore-tool-handoff.md.
+# They sit in the catalog so the tool knows about them; assign them to a
+# tag in biome_overrides.yaml when you're ready.
+immersiveengineering:
+  - immersiveengineering:bauxite
+  - immersiveengineering:lead
+  - immersiveengineering:nickel
+  - immersiveengineering:silver
+  - immersiveengineering:deep_nickel
+  - immersiveengineering:uranium
+
+immersivepetroleum:
+  - immersivepetroleum:reservoir
+
+# --- Intentionally NOT in the catalog (left in biome JSONs) ---
+#
+# Stone / dirt / disk blobs (terrain, not resources):
+#   minecraft:ore_dirt, ore_gravel, ore_clay, ore_tuff,
+#   ore_granite_*, ore_diorite_*, ore_andesite_*,
+#   disk_clay, disk_gravel, disk_sand,
+#   terralith:spires/ore_diorite_upper
+#
+# Decorative / structural:
+#   minecraft:underwater_magma, minecraft:ore_infested (silverfish),
+#   create:striated_ores_overworld (limestone/scoria variants),
+#   createnuclear:striated_ores_overworld,
+#   immersiveengineering:mineral_veins (separate IE underground system),
+#   wythers:terrain/local/tsingy_ore_*, wythers:terrain/extended/volcanic_fallout_ore
+#   (named with "ore" but produce stone/terrain features),
+#   wythers:ores/ore_lava_volcanic (lava pocket).

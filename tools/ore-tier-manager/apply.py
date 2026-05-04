@@ -1,22 +1,23 @@
-"""Regenerate biome JSON `features` arrays from biome_overrides.yaml.
+"""Strip catalog ores from biome JSONs + regenerate endeavour biome_modifiers.
 
 Reads:
+    config/ore_catalog.yaml
     config/biome_overrides.yaml
-    data/endeavour/tags/worldgen/biome/*.json (for biome -> tag membership)
+    data/endeavour/tags/worldgen/biome/*.json
 
-For every biome JSON on disk, recomputes the features array as:
-    union over (tags the biome belongs to) of (tag's biome_overrides entry)
-    then biome-id-specific override applied on top.
-Writes that array back into the biome JSON, preserving every other
-field (climate, mob spawns, surface rules, original key order, indent,
-trailing newline).
+Writes (or rewrites on every run):
+    All biome JSONs              - catalog ores removed from `features`
+    data/endeavour/neoforge/biome_modifier/<tag>__<step>.json
+                                 - one per (tag, step) with ores
 
-The xlsx is NEVER read.
+The biome_modifier directory is fully tool-managed: any pre-existing
+endeavour biome_modifier file is wiped and replaced. The mod-side
+`neoforge:none` shadows under data/<modid>/ are NEVER touched.
 
 Usage:
-    python apply.py             # write biome JSONs
-    python apply.py --dry-run   # report what would change, no writes
-    python apply.py --diff      # show per-biome feature diffs vs. current
+    python apply.py             # do it
+    python apply.py --dry-run   # report what would change
+    python apply.py --diff      # per-biome ore stripping diff + biome_modifier list
 """
 
 from __future__ import annotations
@@ -28,21 +29,23 @@ from collections import OrderedDict
 from pathlib import Path
 
 from common import (
-    CONFIG_DIR,
+    BIOME_OVERRIDES_PATH,
+    ENDEAVOUR_BIOME_MODIFIER_DIR,
     GENERATION_STEPS,
     all_biome_files,
     biome_id_from_path,
+    biome_modifier_files,
     biome_to_tags,
     detect_format,
     load_all_endeavour_tags,
-    resolve_biomes,
+    load_ore_catalog,
+    strip_catalog_ores,
     write_json_preserving,
     yaml_load,
 )
 
 
 def load_existing() -> dict[str, tuple[Path, OrderedDict, list[list[str]]]]:
-    """Return biome_id -> (path, parsed_json, current_features_array)."""
     out: dict[str, tuple[Path, OrderedDict, list[list[str]]]] = {}
     for f in all_biome_files():
         biome_id = biome_id_from_path(f)
@@ -75,58 +78,111 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true",
                         help="report changes; do not write")
     parser.add_argument("--diff", action="store_true",
-                        help="print per-biome feature additions/removals")
+                        help="per-biome ore stripping diff")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="only summary output")
     args = parser.parse_args()
 
-    bo_path = CONFIG_DIR / "biome_overrides.yaml"
-    if not bo_path.exists():
-        print(f"ERROR: missing {bo_path}. Run extract.py first to bootstrap.",
+    if not BIOME_OVERRIDES_PATH.exists():
+        print(f"ERROR: missing {BIOME_OVERRIDES_PATH}. Run extract.py first.",
               file=sys.stderr)
         return 2
 
-    biome_overrides = yaml_load(bo_path) or {}
+    catalog = load_ore_catalog()
+    biome_overrides = yaml_load(BIOME_OVERRIDES_PATH)
     existing = load_existing()
-    on_disk_ids = set(existing)
-    tags = load_all_endeavour_tags(on_disk_ids=on_disk_ids)
-    b2t = biome_to_tags(tags)
 
-    existing_feats = {b: t[2] for b, t in existing.items()}
+    # Only strip ores from biomes that participate in at least one tag.
+    # Untagged biomes (e.g. terralith:skylands_* which aren't in any
+    # endeavour tag) are left as-is - the tool has no opinion on their
+    # ore distribution. Assign them to a tag in the GUI to bring them
+    # under tool management.
+    on_disk = set(existing)
+    tags = load_all_endeavour_tags(on_disk_ids=on_disk)
+    tags_by_biome = biome_to_tags(tags)
+    tagged_biomes = set(tags_by_biome)
+    untagged = sorted(on_disk - tagged_biomes)
 
+    # 1. Compute biome JSON changes (strip catalog ores from tagged biomes)
+    json_changes: list[tuple[str, list[tuple[str, str, str]]]] = []
+    biome_writes: list[tuple[Path, OrderedDict, list[list[str]]]] = []
+    for biome_id in sorted(existing):
+        if biome_id not in tagged_biomes:
+            continue  # leave untagged biomes alone
+        path, data, before = existing[biome_id]
+        after = strip_catalog_ores(before, catalog)
+        if before == after:
+            continue
+        json_changes.append((biome_id, diff_features(before, after)))
+        biome_writes.append((path, data, after))
+
+    # 2. Compute biome_modifier file set
     try:
-        resolved = resolve_biomes(b2t, biome_overrides, existing_feats)
+        modifiers = biome_modifier_files(biome_overrides, catalog)
     except ValueError as e:
-        print(f"ERROR resolving biomes: {e}", file=sys.stderr)
+        print(f"ERROR resolving biome_modifiers: {e}", file=sys.stderr)
         return 3
 
-    changed = 0
-    unchanged = 0
-    diffs: list[tuple[str, list[tuple[str, str, str]]]] = []
+    # 3. Compute biome_modifier diff against existing dir
+    existing_modifier_files = {
+        f.name: json.loads(f.read_text(encoding="utf-8"))
+        for f in ENDEAVOUR_BIOME_MODIFIER_DIR.glob("*.json")
+    } if ENDEAVOUR_BIOME_MODIFIER_DIR.exists() else {}
 
-    for biome_id in sorted(resolved):
-        path, data, before = existing[biome_id]
-        after = resolved[biome_id]
-        if before == after:
-            unchanged += 1
-            continue
-        changed += 1
-        diffs.append((biome_id, diff_features(before, after)))
-        if not args.dry_run:
-            data["features"] = after
-            fmt = detect_format(path.read_text(encoding="utf-8"))
-            write_json_preserving(path, data, fmt)
+    new_filenames = set(modifiers)
+    old_filenames = set(existing_modifier_files)
+    to_create = new_filenames - old_filenames
+    to_delete = old_filenames - new_filenames
+    to_update = {
+        n for n in (new_filenames & old_filenames)
+        if existing_modifier_files[n] != modifiers[n]
+    }
+    unchanged = (new_filenames & old_filenames) - to_update
 
+    # Print
     if args.diff or (args.dry_run and not args.quiet):
-        for biome_id, d in diffs:
+        for biome_id, d in json_changes:
             print(f"\n{biome_id}")
             for step, sign, feat in d:
                 print(f"  {sign} [{step}] {feat}")
+        if json_changes:
+            print()
+        for n in sorted(to_create):
+            print(f"  + biome_modifier {n}")
+        for n in sorted(to_update):
+            print(f"  ~ biome_modifier {n}")
+        for n in sorted(to_delete):
+            print(f"  - biome_modifier {n}")
+
+    # Write
+    if not args.dry_run:
+        for path, data, after in biome_writes:
+            data["features"] = after
+            fmt = detect_format(path.read_text(encoding="utf-8"))
+            write_json_preserving(path, data, fmt)
+        ENDEAVOUR_BIOME_MODIFIER_DIR.mkdir(parents=True, exist_ok=True)
+        for n in to_delete:
+            (ENDEAVOUR_BIOME_MODIFIER_DIR / n).unlink()
+        for n in (to_create | to_update):
+            content = modifiers[n]
+            text = json.dumps(content, indent=2, ensure_ascii=False) + "\n"
+            (ENDEAVOUR_BIOME_MODIFIER_DIR / n).write_text(text, encoding="utf-8")
 
     print()
-    print(f"  resolved: {len(resolved)} biomes")
-    print(f"  unchanged: {unchanged}")
-    print(f"  changed:   {changed}{' (dry-run; no writes)' if args.dry_run else ''}")
+    print(f"  biomes:           {len(existing)} read, "
+          f"{len(json_changes)} stripped, "
+          f"{len(tagged_biomes) - len(json_changes)} tagged-but-clean, "
+          f"{len(untagged)} untagged-skipped")
+    print(f"  biome_modifiers:  "
+          f"{len(to_create)} added, "
+          f"{len(to_update)} updated, "
+          f"{len(to_delete)} removed, "
+          f"{len(unchanged)} unchanged")
+    if untagged and not args.quiet:
+        print(f"  untagged biomes (left alone): "
+              f"{untagged[:5]}{'...' if len(untagged) > 5 else ''}")
+    if args.dry_run:
+        print("  (dry-run; no writes)")
     return 0
 
 

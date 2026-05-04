@@ -1,6 +1,9 @@
 {
   "type": "neoforge:add_features",
   "biomes": "#endeavour:extreme_cold",
-  "features": "createnuclear:uranium_ore",
+  "features": [
+    "createnuclear:uranium_ore",
+    "immersivepetroleum:reservoir"
+  ],
   "step": "underground_ores"
 }
