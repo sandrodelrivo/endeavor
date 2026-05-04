@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 python)",
+      "Bash(python -c \"import yaml; print\\(yaml.__version__\\)\")",
+      "Bash(python -c \"import openpyxl; print\\(openpyxl.__version__\\)\")",
+      "Bash(python extract.py)",
+      "Bash(python extract.py --force)",
+      "Bash(python apply.py --dry-run --quiet)",
+      "Bash(python apply.py)",
+      "Bash(echo \"exitcode=$?\")",
+      "Bash(python validate.py)",
+      "Bash(python apply.py --dry-run)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \"import tkinter; print\\(tkinter.TkVersion\\)\")",
+      "Bash(python)",
+      "Bash(echo \"exit=$?\")"
+    ]
+  }
+}

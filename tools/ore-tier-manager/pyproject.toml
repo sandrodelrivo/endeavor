@@ -1,0 +1,13 @@
+[project]
+name = "ore-tier-manager"
+version = "0.1.0"
+description = "Regenerate Endeavour biome JSONs from declarative tier YAML."
+requires-python = ">=3.11"
+dependencies = [
+    "openpyxl>=3.1",
+    "PyYAML>=6.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
