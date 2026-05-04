@@ -1,7 +1,27 @@
 """Shared constants, paths, formatting helpers, and resolution algorithm.
 
-Single source of truth for the layout of the datapack and the schema of the
-YAML inputs. Both extract.py and apply.py use these.
+Architecture (tag-only, post-2026-05-04 redesign):
+
+- Source of truth for biome -> group membership: tag JSONs at
+  data/endeavour/tags/worldgen/biome/*.json. A biome can be in any
+  number of tags; there's no concept of a "primary" tier.
+
+- Source of truth for tag -> ore lists (and other features): the
+  `#endeavour:<tag>` keys in `biome_overrides.yaml`.
+
+- Per-biome exceptions: `biome_overrides.yaml` keys that match a
+  biome ID directly.
+
+- Resolution per (biome, step):
+      features = union over (every tag containing the biome) of
+                 (that tag's biome_overrides entry, with @add/@remove/@set)
+                 then biome-id-specific overrides apply on top.
+
+- The xlsx is documentation. The tool never reads or writes it.
+
+The previous tier_templates.yaml + xlsx Tier column architecture has
+been retired. Tags subsume tiers: tier_1 / tier_2 / tier_4 are just
+tags whose biome lists happen to be (by convention) mutually exclusive.
 """
 
 from __future__ import annotations
@@ -21,7 +41,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_ROOT = Path(__file__).resolve().parent
 CONFIG_DIR = TOOL_ROOT / "config"
 DATAPACK_ROOT = REPO_ROOT / "datapack-worldgen" / "zzz_endeavour_worldgen" / "data"
-TIER_MAP_XLSX = REPO_ROOT / "design" / "tier-map.xlsx"
 ENDEAVOUR_TAG_DIR = DATAPACK_ROOT / "endeavour" / "tags" / "worldgen" / "biome"
 
 # Vanilla 1.21.1 generation step registry order. Confirmed against
@@ -42,30 +61,6 @@ GENERATION_STEPS: tuple[str, ...] = (
 STEP_INDEX: dict[str, int] = {name: i for i, name in enumerate(GENERATION_STEPS)}
 
 
-def biome_id_to_path(biome_id: str) -> Path:
-    """Map `namespace:path` to its biome JSON inside the datapack.
-
-    Minecraft's biome ID is the file path relative to `data/<ns>/worldgen/
-    biome/` minus the `.json` extension - so `terralith:cave/deep_caves`
-    lives at `terralith/worldgen/biome/cave/deep_caves.json`.
-
-    The tier-map.xlsx is inconsistent: some Terralith cave biomes appear
-    with the `cave/` prefix and some without. We try the literal path
-    first; if missing and there's no slash in the leaf, we also try
-    `cave/<leaf>` for terralith biomes (covers the xlsx typos).
-    """
-    namespace, path = biome_id.split(":", 1)
-    base = DATAPACK_ROOT / namespace / "worldgen" / "biome"
-    literal = base / f"{path}.json"
-    if literal.exists():
-        return literal
-    if namespace == "terralith" and "/" not in path:
-        cave = base / "cave" / f"{path}.json"
-        if cave.exists():
-            return cave
-    return literal  # caller will raise on missing
-
-
 def all_biome_files() -> list[Path]:
     """Every overworld biome JSON we own, across all source namespaces."""
     out: list[Path] = []
@@ -77,14 +72,28 @@ def all_biome_files() -> list[Path]:
     return out
 
 
-def normalize_biome_id(biome_id: str, on_disk_ids: set[str]) -> str:
-    """Reconcile a biome ID from the xlsx against on-disk biome IDs.
+def biome_id_from_path(p: Path) -> str:
+    """Map an on-disk biome JSON path to its biome ID.
 
-    The xlsx is inconsistent about Terralith's `cave/` subfolder: some
-    cave biomes are listed as `terralith:andesite_caves` but their JSON
-    actually lives at `cave/andesite_caves.json` (real ID:
-    `terralith:cave/andesite_caves`). If `biome_id` doesn't match any
-    on-disk ID, try inserting `cave/` for terralith biomes.
+    The biome ID is `<namespace>:<path under worldgen/biome>` minus the
+    `.json` suffix. Subfolders are part of the path: a file at
+    `terralith/worldgen/biome/cave/deep_caves.json` has biome ID
+    `terralith:cave/deep_caves`.
+    """
+    rel = p.relative_to(DATAPACK_ROOT)
+    parts = rel.parts
+    namespace = parts[0]
+    leaf = "/".join(parts[3:])[: -len(".json")]
+    return f"{namespace}:{leaf}"
+
+
+def normalize_biome_id(biome_id: str, on_disk_ids: set[str]) -> str:
+    """Reconcile a biome ID against on-disk biome IDs.
+
+    Some legacy tag JSONs list Terralith cave biomes without the `cave/`
+    prefix (e.g. `terralith:andesite_caves` while the file is actually at
+    `cave/andesite_caves.json`). If `biome_id` doesn't match an on-disk
+    ID, try inserting `cave/` for terralith biomes.
     """
     if biome_id in on_disk_ids:
         return biome_id
@@ -93,21 +102,6 @@ def normalize_biome_id(biome_id: str, on_disk_ids: set[str]) -> str:
         if candidate in on_disk_ids:
             return candidate
     return biome_id  # caller will detect the mismatch
-
-
-def biome_id_from_path(p: Path) -> str:
-    """Inverse of biome_id_to_path.
-
-    The biome ID is the namespace plus the slash-joined path under
-    `worldgen/biome/`, including any subfolders. Files in `cave/` keep
-    the prefix - that's how the chunk generator addresses them.
-    """
-    rel = p.relative_to(DATAPACK_ROOT)
-    parts = rel.parts
-    namespace = parts[0]
-    # parts[1]/parts[2] = "worldgen"/"biome"
-    leaf = "/".join(parts[3:])[: -len(".json")]
-    return f"{namespace}:{leaf}"
 
 
 def load_endeavour_tag(tag_name: str) -> set[str]:
@@ -128,6 +122,45 @@ def load_endeavour_tag(tag_name: str) -> set[str]:
     return out
 
 
+def load_all_endeavour_tags(on_disk_ids: set[str] | None = None
+                            ) -> dict[str, set[str]]:
+    """Read every endeavour tag JSON; return {tag_name: set_of_biome_ids}.
+
+    Biome IDs are normalized against on_disk_ids if provided, so legacy
+    tag entries with wrong cave/ paths get auto-corrected at read time.
+    """
+    out: dict[str, set[str]] = {}
+    for f in sorted(ENDEAVOUR_TAG_DIR.glob("*.json")):
+        data = json.loads(f.read_text(encoding="utf-8"))
+        ids: set[str] = set()
+        for v in data.get("values", []):
+            if isinstance(v, str):
+                bid = v
+            elif isinstance(v, dict) and "id" in v:
+                bid = v["id"]
+            else:
+                continue
+            if on_disk_ids is not None:
+                bid = normalize_biome_id(bid, on_disk_ids)
+            ids.add(bid)
+        out[f.stem] = ids
+    return out
+
+
+def biome_to_tags(tags_by_name: dict[str, set[str]]) -> dict[str, list[str]]:
+    """Inverse of {tag: {biomes}}: return {biome_id: [tag_name, ...]}.
+
+    Tag names are sorted for deterministic resolution order.
+    """
+    out: dict[str, list[str]] = {}
+    for tag, biomes in tags_by_name.items():
+        for b in biomes:
+            out.setdefault(b, []).append(tag)
+    for biomes_tags in out.values():
+        biomes_tags.sort()
+    return out
+
+
 # --- JSON formatting preservation -----------------------------------------
 
 @dataclass
@@ -140,7 +173,6 @@ class JsonFormat:
 
 def detect_format(text: str) -> JsonFormat:
     """Inspect the raw text to recover indentation + trailing newline."""
-    # Find first indented line to detect indent width.
     indent = 4
     for line in text.split("\n"):
         stripped = line.lstrip(" ")
@@ -174,10 +206,7 @@ def yaml_load(path: Path) -> dict:
 
 
 def _ordered_to_plain(obj):
-    """Recursively convert OrderedDict -> dict for safe YAML dumping.
-
-    Python 3.7+ preserves insertion order, so ordering survives.
-    """
+    """Recursively convert OrderedDict -> dict for safe YAML dumping."""
     if isinstance(obj, OrderedDict):
         return {k: _ordered_to_plain(v) for k, v in obj.items()}
     if isinstance(obj, dict):
@@ -201,22 +230,13 @@ def yaml_dump(path: Path, data: dict, header: str = "") -> None:
     path.write_text(text, encoding="utf-8")
 
 
-# --- Resolution: tier_template + biome_overrides -> per-biome features ----
+# --- Resolution: biome_overrides + tag membership -> per-biome features ---
 
-# YAML override keys (used in both tier_templates and biome_overrides)
-OP_INHERIT = "@inherit"
 OP_SET = "@set"
 OP_ADD = "@add"
 OP_REMOVE = "@remove"
 
-ALL_OPS = {OP_INHERIT, OP_SET, OP_ADD, OP_REMOVE}
-
-
-@dataclass
-class Resolved:
-    """Resolved feature list for one biome+step plus diagnostic info."""
-    features: list[str]
-    sources: list[str] = field(default_factory=list)  # for debugging
+ALL_OPS = {OP_SET, OP_ADD, OP_REMOVE}
 
 
 def _ensure_list(v) -> list[str]:
@@ -227,45 +247,9 @@ def _ensure_list(v) -> list[str]:
     return list(v)
 
 
-def _resolve_template(
-    tier: str,
-    step: str,
-    tier_templates: dict,
-    seen: tuple[str, ...] = (),
-) -> list[str]:
-    """Recursively resolve a tier_templates entry honoring @inherit chains."""
-    if tier in seen:
-        chain = " -> ".join(seen + (tier,))
-        raise ValueError(f"@inherit cycle in tier_templates: {chain}")
-    block = (tier_templates.get(tier) or {}).get(step)
-    if block is None:
-        return []
-    if isinstance(block, list):
-        return list(block)
-    if not isinstance(block, dict):
-        raise ValueError(
-            f"tier_templates.{tier}.{step}: expected list or dict with @* ops, "
-            f"got {type(block).__name__}"
-        )
-    base: list[str] = []
-    if OP_INHERIT in block:
-        parent = block[OP_INHERIT]
-        base = _resolve_template(parent, step, tier_templates, seen + (tier,))
-    if OP_SET in block:
-        base = _ensure_list(block[OP_SET])
-    for f in _ensure_list(block.get(OP_ADD)):
-        if f not in base:
-            base.append(f)
-    remove = set(_ensure_list(block.get(OP_REMOVE)))
-    if remove:
-        base = [f for f in base if f not in remove]
-    return base
-
-
 def _apply_op_block(base: list[str], block) -> list[str]:
     """Apply a single override block (list or @-op dict) to `base`."""
     if isinstance(block, list):
-        # Bare list = full override (same as @set)
         return list(block)
     if not isinstance(block, dict):
         raise ValueError(
@@ -283,92 +267,74 @@ def _apply_op_block(base: list[str], block) -> list[str]:
     return out
 
 
-def _expand_override_keys(
-    biome_overrides: dict,
-) -> list[tuple[str, dict]]:
-    """Yield (biome_id, step_block_dict) pairs.
-
-    Tag keys (`#endeavour:foo`) are expanded by reading the tag JSONs.
-    Tag overrides are applied BEFORE biome-specific overrides so that an
-    explicit biome key can override a tag-applied default.
-    """
-    tag_entries: list[tuple[str, dict]] = []
-    biome_entries: list[tuple[str, dict]] = []
-    for key, block in biome_overrides.items():
-        if not block:
-            continue
-        if key.startswith("#"):
-            # `#namespace:tag` -> we only support endeavour: tags here
-            ns, tag = key[1:].split(":", 1)
-            if ns != "endeavour":
-                raise ValueError(
-                    f"unsupported tag namespace in override key {key!r}: "
-                    f"only #endeavour:* tags are recognized"
-                )
-            for biome_id in sorted(load_endeavour_tag(tag)):
-                tag_entries.append((biome_id, block))
-        else:
-            biome_entries.append((key, block))
-    return tag_entries + biome_entries
-
-
 def resolve_biomes(
-    tier_map: dict[str, str],          # biome_id -> tier
-    tier_templates: dict,
+    tags_by_biome: dict[str, list[str]],
     biome_overrides: dict,
     existing_features: dict[str, list[list[str]]],
 ) -> dict[str, list[list[str]]]:
     """Compute the final features array for every biome.
 
-    Returns biome_id -> array-of-step-arrays (in vanilla generation order).
+    For each biome, resolution is:
+      1. Start with empty feature list per step.
+      2. For each tag the biome belongs to (sorted by tag name for
+         determinism), apply that tag's biome_overrides entry if any.
+      3. Apply the biome-id-specific override entry if any.
 
-    Resolution per (biome, step):
-      1. Start with tier_templates[biome.tier][step] (resolved with @inherit).
-      2. Apply tag-based overrides (#endeavour:foo) in YAML order.
-      3. Apply biome-id-specific overrides.
-
-    Per-step ordering policy:
-      - For features that were already in the existing biome JSON, preserve
-        their original order. The existing data is empirically known to
-        load (cycles and all - vanilla 1.21.1's FeatureSorter is more
-        permissive than its error message suggests, and Terralith ships
-        biomes that disagree on e.g. fossil_upper vs monster_room_deep
-        ordering at underground_structures).
-      - New features added via YAML are appended at the end of the step
-        in YAML-encounter order.
+    The final per-step list is then ordered against the existing biome
+    JSON's order: features that were already there keep their original
+    position, and net-new features append at the end. This avoids
+    creating cross-biome FeatureSorter ordering cycles where none
+    existed before.
 
     Biomes whose existing JSON has fewer than 11 step arrays (e.g. the
     odd fractured_savanna which has 10) keep the same length on output.
-    """
-    expanded = _expand_override_keys(biome_overrides)
 
+    Args:
+      tags_by_biome: biome_id -> list of tag names (without `#endeavour:`).
+      biome_overrides: parsed biome_overrides.yaml.
+      existing_features: biome_id -> current per-step features array.
+        Used both to decide which biomes to emit and to preserve order.
+
+    Returns:
+      biome_id -> per-step features array.
+    """
     out: dict[str, list[list[str]]] = {}
-    for biome_id in tier_map:
-        tier = tier_map[biome_id]
-        per_step: dict[str, list[str]] = {}
-        for step in GENERATION_STEPS:
-            base = _resolve_template(tier, step, tier_templates) if tier else []
-            per_step[step] = list(base)
-        for ov_biome, block in expanded:
-            if ov_biome != biome_id:
+
+    for biome_id, existing in existing_features.items():
+        per_step: dict[str, list[str]] = {s: [] for s in GENERATION_STEPS}
+
+        # 1. tag overrides (sorted for determinism)
+        for tag in sorted(tags_by_biome.get(biome_id, [])):
+            tag_block = biome_overrides.get(f"#endeavour:{tag}")
+            if not tag_block:
                 continue
-            for step, op_block in block.items():
+            for step, op_block in tag_block.items():
                 if step not in STEP_INDEX:
                     raise ValueError(
-                        f"biome {biome_id!r}: unknown step {step!r}. "
-                        f"Valid steps: {GENERATION_STEPS}"
+                        f"#endeavour:{tag}: unknown step {step!r}. "
+                        f"Valid: {GENERATION_STEPS}"
                     )
                 per_step[step] = _apply_op_block(per_step[step], op_block)
 
-        existing = existing_features.get(biome_id, [])
+        # 2. biome-id override
+        biome_block = biome_overrides.get(biome_id)
+        if biome_block:
+            for step, op_block in biome_block.items():
+                if step not in STEP_INDEX:
+                    raise ValueError(
+                        f"biome {biome_id!r}: unknown step {step!r}. "
+                        f"Valid: {GENERATION_STEPS}"
+                    )
+                per_step[step] = _apply_op_block(per_step[step], op_block)
+
         n_steps = min(len(existing) if existing else len(GENERATION_STEPS),
                       len(GENERATION_STEPS))
         arr: list[list[str]] = []
         for i in range(n_steps):
             step = GENERATION_STEPS[i]
-            resolved = per_step.get(step, [])
             existing_step = existing[i] if i < len(existing) else []
-            arr.append(_order_against_existing(resolved, existing_step))
+            arr.append(_order_against_existing(per_step.get(step, []),
+                                                existing_step))
         out[biome_id] = arr
     return out
 

@@ -1,21 +1,17 @@
-"""Regenerate biome JSON `features` arrays from YAML inputs.
+"""Regenerate biome JSON `features` arrays from biome_overrides.yaml.
 
 Reads:
-    config/tier_templates.yaml
     config/biome_overrides.yaml
-    design/tier-map.xlsx (Biomes sheet -> biome_id -> tier)
+    data/endeavour/tags/worldgen/biome/*.json (for biome -> tag membership)
 
-For every biome in the xlsx (and any biome present only in biome_overrides),
-recomputes the features array as:
-    tier_template[tier] -> tag overrides -> biome-id overrides
-then writes that array back into the biome JSON, preserving every other
+For every biome JSON on disk, recomputes the features array as:
+    union over (tags the biome belongs to) of (tag's biome_overrides entry)
+    then biome-id-specific override applied on top.
+Writes that array back into the biome JSON, preserving every other
 field (climate, mob spawns, surface rules, original key order, indent,
-trailing newline behavior).
+trailing newline).
 
-Cross-biome ordering is enforced by a single global topological sort per
-generation step, so two biomes can't end up listing a shared feature in
-opposite orders (which crashes worldgen with FeatureSorter's
-"Feature order cycle found").
+The xlsx is NEVER read.
 
 Usage:
     python apply.py             # write biome JSONs
@@ -31,34 +27,18 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 
-import openpyxl
-
 from common import (
     CONFIG_DIR,
-    DATAPACK_ROOT,
     GENERATION_STEPS,
-    TIER_MAP_XLSX,
     all_biome_files,
     biome_id_from_path,
+    biome_to_tags,
     detect_format,
-    normalize_biome_id,
+    load_all_endeavour_tags,
     resolve_biomes,
     write_json_preserving,
     yaml_load,
 )
-
-
-def load_tier_map(on_disk_ids: set[str]) -> dict[str, str]:
-    wb = openpyxl.load_workbook(TIER_MAP_XLSX, data_only=True)
-    ws = wb["Biomes"]
-    out: dict[str, str] = {}
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        biome_id, _src, _climate, _terr, tier, *_ = row
-        if not biome_id:
-            continue
-        bid = normalize_biome_id(str(biome_id).strip(), on_disk_ids)
-        out[bid] = (str(tier).strip() if tier else "")
-    return out
 
 
 def load_existing() -> dict[str, tuple[Path, OrderedDict, list[list[str]]]]:
@@ -77,7 +57,6 @@ def diff_features(
     before: list[list[str]],
     after: list[list[str]],
 ) -> list[tuple[str, str, str]]:
-    """Return [(step_name, '+'/'-', feature_id)] for adds/removes."""
     n = max(len(before), len(after))
     out: list[tuple[str, str, str]] = []
     for i in range(n):
@@ -101,42 +80,22 @@ def main() -> int:
                         help="only summary output")
     args = parser.parse_args()
 
-    tt_path = CONFIG_DIR / "tier_templates.yaml"
     bo_path = CONFIG_DIR / "biome_overrides.yaml"
-    if not tt_path.exists() or not bo_path.exists():
-        print(
-            f"ERROR: missing config files. Run extract.py first to bootstrap.\n"
-            f"  expected: {tt_path}\n"
-            f"  expected: {bo_path}",
-            file=sys.stderr,
-        )
+    if not bo_path.exists():
+        print(f"ERROR: missing {bo_path}. Run extract.py first to bootstrap.",
+              file=sys.stderr)
         return 2
 
-    tier_templates = yaml_load(tt_path).get("tiers") or {}
     biome_overrides = yaml_load(bo_path) or {}
     existing = load_existing()
-    tier_map = load_tier_map(set(existing))
+    on_disk_ids = set(existing)
+    tags = load_all_endeavour_tags(on_disk_ids=on_disk_ids)
+    b2t = biome_to_tags(tags)
 
-    # Union of biomes from xlsx, biome_overrides (excluding tag keys), and disk
-    biomes_in_overrides = {
-        k for k in biome_overrides
-        if not k.startswith("#") and ":" in k
-    }
-    all_biomes = set(tier_map) | biomes_in_overrides | set(existing)
-    # Restrict to biomes we have files for - we won't create new biome JSONs.
-    target_biomes = {b for b in all_biomes if b in existing}
-    missing = sorted(all_biomes - target_biomes)
-    if missing:
-        print(f"WARN: {len(missing)} biomes referenced but no JSON file on disk: "
-              f"{missing[:5]}{'...' if len(missing) > 5 else ''}", file=sys.stderr)
-
-    # Pass tier map filtered to target biomes; resolve_biomes also needs the
-    # existing features so it can preserve odd step counts (fractured_savanna).
-    tm = {b: tier_map.get(b, "") for b in target_biomes}
-    existing_feats = {b: existing[b][2] for b in target_biomes}
+    existing_feats = {b: t[2] for b, t in existing.items()}
 
     try:
-        resolved = resolve_biomes(tm, tier_templates, biome_overrides, existing_feats)
+        resolved = resolve_biomes(b2t, biome_overrides, existing_feats)
     except ValueError as e:
         print(f"ERROR resolving biomes: {e}", file=sys.stderr)
         return 3

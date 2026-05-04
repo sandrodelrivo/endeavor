@@ -26,9 +26,12 @@ from pathlib import Path
 
 from common import (
     DATAPACK_ROOT,
+    ENDEAVOUR_TAG_DIR,
     GENERATION_STEPS,
     all_biome_files,
     biome_id_from_path,
+    load_all_endeavour_tags,
+    normalize_biome_id,
 )
 
 
@@ -132,6 +135,21 @@ def validate() -> int:
               "may be typos):", file=sys.stderr)
         for ns, refs in sorted(unknown_ns.items()):
             print(f"  {ns}: {len(refs)} ref(s), first: {refs[0]}", file=sys.stderr)
+
+    # Tag membership sanity: any biome IDs in tag JSONs that aren't on disk?
+    on_disk = set(biome_features)
+    raw_tags = load_all_endeavour_tags()  # un-normalized
+    stale: dict[str, list[str]] = {}
+    for tag, ids in raw_tags.items():
+        for bid in ids:
+            normalized = normalize_biome_id(bid, on_disk)
+            if normalized not in on_disk:
+                stale.setdefault(tag, []).append(bid)
+    if stale:
+        print("WARN: tag JSONs reference biomes not on disk:", file=sys.stderr)
+        for tag, ids in sorted(stale.items()):
+            print(f"  {tag}: {ids[:5]}{'...' if len(ids) > 5 else ''}",
+                  file=sys.stderr)
 
     print()
     if issues:

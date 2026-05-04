@@ -14,7 +14,9 @@
       "Bash(python apply.py --dry-run)",
       "Bash(PYTHONIOENCODING=utf-8 python -c \"import tkinter; print\\(tkinter.TkVersion\\)\")",
       "Bash(python)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(cp -r datapack-worldgen/zzz_endeavour_worldgen/data /tmp/snap)",
+      "Bash(cp -r tools/ore-tier-manager/config /tmp/snap_config)"
     ]
   }
 }

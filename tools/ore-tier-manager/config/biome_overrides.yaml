@@ -1,18 +1,126 @@
-# Per-biome additions/removals on top of the tier template.
+# Biome-overrides: the only place where ore lists live.
 #
-# Keys:
-#   "<namespace>:<path>"          -- single biome (e.g. "minecraft:badlands")
-#   "#endeavour:<tag>"            -- expands via the tag JSON; tag overrides
-#                                    apply BEFORE biome-id overrides so a
-#                                    specific biome can override a tag default.
+# Two kinds of keys:
+#   "#endeavour:<tag>"            -- applies to every biome listed in
+#                                    `data/endeavour/tags/worldgen/biome/<tag>.json`.
+#   "<namespace>:<biome>"         -- applies to a single biome on top of
+#                                    its tag overrides.
 #
-# Per-step ops: same vocabulary as tier_templates.yaml (@set/@add/@remove).
+# Per-step ops:
+#   "@set":   [...]               -- replace whatever was inherited from tags
+#   "@add":   [...]               -- append (dedup)
+#   "@remove":[...]               -- drop by ID
+# A bare list is shorthand for @set.
 #
-# Bootstrap note: this file was seeded by extract.py from the current
-# biome JSONs. Each biome carries its full delta from the tier template.
-# As you iterate, prefer adding shared features to tier_templates.yaml
-# and removing them from individual biome entries here.
+# Resolution per biome:
+#   features = (apply each tag's overrides in tag-name sort order)
+#              then (apply biome-id-specific overrides)
+#
+# Steps follow vanilla 1.21.1 GenerationStep.Decoration order:
+#   raw_generation, lakes, local_modifications, underground_structures,
+#   surface_structures, strongholds, underground_ores, underground_decoration,
+#   fluid_springs, vegetal_decoration, top_layer_modification.
+#
+# IE secondary ores (immersiveengineering:bauxite/lead/nickel/silver/deep_nickel),
+# createnuclear:lead_ore, and create:striated_ores_overworld are intentionally
+# absent: their tag home is undecided. To enable, add them under the
+# appropriate tag entry.
+#
+# The xlsx (design/tier-map.xlsx) is documentation only; this tool never
+# reads or writes it.
 
+'#endeavour:tier_1':
+  underground_structures:
+    '@add':
+    - minecraft:monster_room
+  underground_ores:
+    '@add':
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_large
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:underwater_magma
+'#endeavour:tier_2':
+  lakes:
+    '@add':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@add':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@add':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@add':
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+  fluid_springs:
+    '@add':
+    - minecraft:spring_water
+  vegetal_decoration:
+    '@add':
+    - minecraft:glow_lichen
+  top_layer_modification:
+    '@add':
+    - minecraft:freeze_top_layer
+'#endeavour:tier_4':
+  lakes:
+    '@add':
+    - minecraft:lake_lava_underground
+  local_modifications:
+    '@add':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@add':
+    - minecraft:monster_room
+  underground_ores:
+    '@add':
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_large
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+  vegetal_decoration:
+    '@add':
+    - minecraft:glow_lichen
+  top_layer_modification:
+    '@add':
+    - minecraft:freeze_top_layer
 minecraft:badlands:
   lakes:
     '@add':
@@ -363,6 +471,62 @@ minecraft:deep_cold_ocean:
     - minecraft:seagrass_deep_cold
     - minecraft:seagrass_simple
     - minecraft:kelp_cold
+minecraft:deep_dark:
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  underground_decoration:
+    '@set':
+    - minecraft:sculk_vein
+    - minecraft:sculk_patch_deep_dark
+  vegetal_decoration:
+    '@set':
+    - minecraft:glow_lichen
+    - minecraft:patch_tall_grass_2
+    - minecraft:trees_plains
+    - minecraft:flower_plains
+    - minecraft:patch_grass_plain
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 minecraft:deep_frozen_ocean:
   lakes:
     '@add':
@@ -2259,6 +2423,86 @@ minecraft:wooded_badlands:
     - minecraft:patch_sugar_cane_badlands
     - minecraft:patch_pumpkin
     - minecraft:patch_cactus_decorated
+terralith:alpha_islands:
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+  strongholds:
+    '@set':
+    - terralith:alpha/clay_patch
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+  underground_decoration:
+    '@set':
+    - terralith:alpha/sand_beaches
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:alpha/trees
+    - terralith:alpha/flowers_2
+    - terralith:alpha/flowers
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
+terralith:alpha_islands_winter:
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+  strongholds:
+    '@set':
+    - terralith:alpha/clay_patch
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+  underground_decoration:
+    '@set':
+    - terralith:alpha/sand_beaches
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:alpha/trees
+    - terralith:alpha/flowers_2
+    - terralith:alpha/flowers
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:alpine_grove:
   underground_structures:
     '@add':
@@ -2351,6 +2595,73 @@ terralith:alpine_highlands:
   top_layer_modification:
     '@add':
     - minecraft:freeze_top_layer
+terralith:amethyst_canyon:
+  raw_generation:
+    '@set':
+    - terralith:canyon/cliff/calcite_upper
+    - terralith:canyon/cliff/calcite_lower
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - minecraft:glow_lichen
+    - minecraft:bamboo_light
+    - minecraft:flower_warm
+    - minecraft:patch_grass_jungle
+    - terralith:jungle/amethyst/trees
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+    - terralith:jungle/patch_melon
+    - minecraft:vines
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:amethyst_rainforest:
   underground_ores:
     '@add':
@@ -2381,6 +2692,70 @@ terralith:amethyst_rainforest:
     - minecraft:patch_pumpkin
     - terralith:jungle/patch_melon
     - minecraft:vines
+terralith:ancient_sands:
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:fossil_upper
+    - minecraft:fossil_lower
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  surface_structures:
+    '@set':
+    - minecraft:desert_well
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - minecraft:glow_lichen
+    - minecraft:flower_default
+    - minecraft:patch_grass_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane_desert
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:arid_highlands:
   raw_generation:
     '@add':
@@ -2712,6 +3087,75 @@ terralith:bryce_canyon:
     - minecraft:patch_sugar_cane_badlands
     - minecraft:patch_pumpkin
     - minecraft:patch_cactus_decorated
+terralith:caldera:
+  raw_generation:
+    '@set':
+    - terralith:caldera/crater_fixer
+    - terralith:caldera/lakes
+    - terralith:yellowstone/magma
+    - terralith:yellowstone/vents
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - minecraft:glow_lichen
+    - minecraft:patch_large_fern
+    - minecraft:flower_default
+    - minecraft:patch_grass_taiga_2
+    - minecraft:brown_mushroom_taiga
+    - minecraft:red_mushroom_taiga
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+    - minecraft:patch_berry_common
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:cave/andesite_caves:
   raw_generation:
     '@add':
@@ -4092,6 +4536,72 @@ terralith:lush_valley:
     - minecraft:patch_sugar_cane
     - minecraft:patch_pumpkin
     - minecraft:patch_berry_common
+terralith:mirage_isles:
+  raw_generation:
+    '@set':
+    - terralith:canyon/cliff/grass_upper
+    - terralith:canyon/cliff/grass_lower
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:enchanted/shrooms
+    - terralith:enchanted/shrooms_brown
+    - terralith:enchanted/small_shrooms
+    - terralith:enchanted/small_shrooms_brown
+    - terralith:enchanted/trees
+    - minecraft:glow_lichen
+    - minecraft:forest_flowers
+    - minecraft:flower_default
+    - minecraft:patch_grass_forest
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:moonlight_grove:
   underground_ores:
     '@add':
@@ -4765,6 +5275,291 @@ terralith:siberian_taiga:
     - minecraft:patch_sugar_cane
     - minecraft:patch_pumpkin
     - minecraft:patch_berry_common
+terralith:skylands_autumn:
+  raw_generation:
+    '@set':
+    - terralith:skylands/floating_islands
+    - terralith:skylands/extend_down_high
+    - terralith:skylands/extend_down
+    - terralith:skylands/dirt_tops
+    - terralith:skylands/grassy_tops
+    - terralith:skylands/wheat
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - terralith:skylands/spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:skylands/waterfall
+    - terralith:skylands/winter/lichen
+    - terralith:skylands/patch_grass
+    - minecraft:glow_lichen
+    - terralith:skylands/trees
+    - minecraft:flower_default
+    - minecraft:patch_grass_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - terralith:skylands/patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
+terralith:skylands_spring:
+  raw_generation:
+    '@set':
+    - terralith:skylands/spring/floating_islands
+    - terralith:skylands/spring/extend_down_high
+    - terralith:skylands/spring/extend_down
+    - terralith:skylands/dirt_tops
+    - terralith:skylands/grassy_tops
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - terralith:skylands/spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:skylands/waterfall
+    - terralith:skylands/spring/lake
+    - terralith:skylands/spring/lichen
+    - terralith:sakura/birch_sparse
+    - terralith:skylands/spring/flowers
+    - terralith:skylands/patch_grass
+    - minecraft:glow_lichen
+    - terralith:skylands/spring/trees
+    - minecraft:flower_default
+    - minecraft:patch_grass_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
+terralith:skylands_summer:
+  raw_generation:
+    '@set':
+    - terralith:skylands/summer/floating_islands
+    - terralith:skylands/summer/extend_down_high
+    - terralith:skylands/summer/extend_down
+    - terralith:skylands/dirt_tops
+    - terralith:skylands/summer/grassy_tops
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - terralith:skylands/spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:skylands/waterfall
+    - terralith:skylands/summer/mud_lines
+    - terralith:skylands/summer/glowberries
+    - terralith:skylands/patch_grass
+    - minecraft:glow_lichen
+    - terralith:skylands/summer/trees
+    - terralith:skylands/summer/cactus
+    - terralith:skylands/summer/tall_flowers
+    - minecraft:patch_grass_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
+terralith:skylands_winter:
+  raw_generation:
+    '@set':
+    - terralith:skylands/winter/floating_islands
+    - terralith:skylands/winter/extend_down_high
+    - terralith:skylands/winter/extend_down
+    - terralith:skylands/dirt_tops
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - terralith:skylands/spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - terralith:skylands/waterfall
+    - terralith:skylands/lichen
+    - minecraft:glow_lichen
+    - terralith:skylands/winter/trees
+    - terralith:skylands/winter/grassy_tops
+    - minecraft:flower_default
+    - minecraft:patch_grass_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:snowy_badlands:
   raw_generation:
     '@add':
@@ -5243,6 +6038,138 @@ terralith:warm_river:
     - minecraft:patch_sugar_cane
     - minecraft:patch_pumpkin
     - minecraft:seagrass_river
+terralith:warped_mesa:
+  raw_generation:
+    '@set':
+    - terralith:valley/blue_terra
+    - terralith:valley/light_blue_terra
+    - terralith:valley/lime_terra
+    - terralith:valley/cyan_terra
+    - terralith:valley/purple_terra
+    - terralith:valley/green_terra
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_dirt
+    - minecraft:ore_gravel
+    - minecraft:ore_granite_upper
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_upper
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_upper
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:ore_gold_extra
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - minecraft:glow_lichen
+    - minecraft:patch_grass_badlands
+    - minecraft:patch_dead_bush_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane_badlands
+    - minecraft:patch_pumpkin
+    - minecraft:patch_cactus_decorated
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
+terralith:white_cliffs:
+  raw_generation:
+    '@set':
+    - terralith:cliffs/white/calcitifier
+    - terralith:cliffs/white/diorite_seed
+    - terralith:cliffs/white/diorite_crack
+    - terralith:cliffs/white/andesite_seed
+    - terralith:cliffs/white/andesite_crack
+    - terralith:cliffs/white/moss_patch
+  lakes:
+    '@set':
+    - minecraft:lake_lava_underground
+    - minecraft:lake_lava_surface
+  local_modifications:
+    '@set':
+    - minecraft:amethyst_geode
+  underground_structures:
+    '@set':
+    - minecraft:monster_room
+    - minecraft:monster_room_deep
+  underground_ores:
+    '@set':
+    - minecraft:ore_granite_lower
+    - minecraft:ore_diorite_lower
+    - minecraft:ore_andesite_lower
+    - minecraft:ore_tuff
+    - minecraft:ore_coal_upper
+    - minecraft:ore_coal_lower
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+    - minecraft:ore_copper
+    - minecraft:underwater_magma
+    - minecraft:disk_sand
+    - minecraft:disk_clay
+    - minecraft:disk_gravel
+  fluid_springs:
+    '@set':
+    - minecraft:spring_water
+    - minecraft:spring_lava
+  vegetal_decoration:
+    '@set':
+    - minecraft:glow_lichen
+    - terralith:cliffs/white/trees_small
+    - minecraft:flower_default
+    - minecraft:patch_grass_badlands
+    - minecraft:brown_mushroom_normal
+    - minecraft:red_mushroom_normal
+    - minecraft:patch_sugar_cane
+    - minecraft:patch_pumpkin
+  top_layer_modification:
+    '@set':
+    - minecraft:freeze_top_layer
 terralith:white_mesa:
   underground_ores:
     '@add':
@@ -5509,822 +6436,3 @@ terralith:yosemite_lowlands:
     - minecraft:patch_sugar_cane
     - minecraft:patch_pumpkin
     - minecraft:patch_berry_common
-minecraft:deep_dark:
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  underground_decoration:
-    '@set':
-    - minecraft:sculk_vein
-    - minecraft:sculk_patch_deep_dark
-  vegetal_decoration:
-    '@set':
-    - minecraft:glow_lichen
-    - minecraft:patch_tall_grass_2
-    - minecraft:trees_plains
-    - minecraft:flower_plains
-    - minecraft:patch_grass_plain
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:alpha_islands:
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-  strongholds:
-    '@set':
-    - terralith:alpha/clay_patch
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-  underground_decoration:
-    '@set':
-    - terralith:alpha/sand_beaches
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:alpha/trees
-    - terralith:alpha/flowers_2
-    - terralith:alpha/flowers
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:alpha_islands_winter:
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-  strongholds:
-    '@set':
-    - terralith:alpha/clay_patch
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-  underground_decoration:
-    '@set':
-    - terralith:alpha/sand_beaches
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:alpha/trees
-    - terralith:alpha/flowers_2
-    - terralith:alpha/flowers
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:amethyst_canyon:
-  raw_generation:
-    '@set':
-    - terralith:canyon/cliff/calcite_upper
-    - terralith:canyon/cliff/calcite_lower
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - minecraft:glow_lichen
-    - minecraft:bamboo_light
-    - minecraft:flower_warm
-    - minecraft:patch_grass_jungle
-    - terralith:jungle/amethyst/trees
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-    - terralith:jungle/patch_melon
-    - minecraft:vines
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:ancient_sands:
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:fossil_upper
-    - minecraft:fossil_lower
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  surface_structures:
-    '@set':
-    - minecraft:desert_well
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - minecraft:glow_lichen
-    - minecraft:flower_default
-    - minecraft:patch_grass_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane_desert
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:caldera:
-  raw_generation:
-    '@set':
-    - terralith:caldera/crater_fixer
-    - terralith:caldera/lakes
-    - terralith:yellowstone/magma
-    - terralith:yellowstone/vents
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - minecraft:glow_lichen
-    - minecraft:patch_large_fern
-    - minecraft:flower_default
-    - minecraft:patch_grass_taiga_2
-    - minecraft:brown_mushroom_taiga
-    - minecraft:red_mushroom_taiga
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-    - minecraft:patch_berry_common
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:mirage_isles:
-  raw_generation:
-    '@set':
-    - terralith:canyon/cliff/grass_upper
-    - terralith:canyon/cliff/grass_lower
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:enchanted/shrooms
-    - terralith:enchanted/shrooms_brown
-    - terralith:enchanted/small_shrooms
-    - terralith:enchanted/small_shrooms_brown
-    - terralith:enchanted/trees
-    - minecraft:glow_lichen
-    - minecraft:forest_flowers
-    - minecraft:flower_default
-    - minecraft:patch_grass_forest
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:skylands_autumn:
-  raw_generation:
-    '@set':
-    - terralith:skylands/floating_islands
-    - terralith:skylands/extend_down_high
-    - terralith:skylands/extend_down
-    - terralith:skylands/dirt_tops
-    - terralith:skylands/grassy_tops
-    - terralith:skylands/wheat
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - terralith:skylands/spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:skylands/waterfall
-    - terralith:skylands/winter/lichen
-    - terralith:skylands/patch_grass
-    - minecraft:glow_lichen
-    - terralith:skylands/trees
-    - minecraft:flower_default
-    - minecraft:patch_grass_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - terralith:skylands/patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:skylands_spring:
-  raw_generation:
-    '@set':
-    - terralith:skylands/spring/floating_islands
-    - terralith:skylands/spring/extend_down_high
-    - terralith:skylands/spring/extend_down
-    - terralith:skylands/dirt_tops
-    - terralith:skylands/grassy_tops
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - terralith:skylands/spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:skylands/waterfall
-    - terralith:skylands/spring/lake
-    - terralith:skylands/spring/lichen
-    - terralith:sakura/birch_sparse
-    - terralith:skylands/spring/flowers
-    - terralith:skylands/patch_grass
-    - minecraft:glow_lichen
-    - terralith:skylands/spring/trees
-    - minecraft:flower_default
-    - minecraft:patch_grass_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:skylands_summer:
-  raw_generation:
-    '@set':
-    - terralith:skylands/summer/floating_islands
-    - terralith:skylands/summer/extend_down_high
-    - terralith:skylands/summer/extend_down
-    - terralith:skylands/dirt_tops
-    - terralith:skylands/summer/grassy_tops
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - terralith:skylands/spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:skylands/waterfall
-    - terralith:skylands/summer/mud_lines
-    - terralith:skylands/summer/glowberries
-    - terralith:skylands/patch_grass
-    - minecraft:glow_lichen
-    - terralith:skylands/summer/trees
-    - terralith:skylands/summer/cactus
-    - terralith:skylands/summer/tall_flowers
-    - minecraft:patch_grass_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:skylands_winter:
-  raw_generation:
-    '@set':
-    - terralith:skylands/winter/floating_islands
-    - terralith:skylands/winter/extend_down_high
-    - terralith:skylands/winter/extend_down
-    - terralith:skylands/dirt_tops
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - terralith:skylands/spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - terralith:skylands/waterfall
-    - terralith:skylands/lichen
-    - minecraft:glow_lichen
-    - terralith:skylands/winter/trees
-    - terralith:skylands/winter/grassy_tops
-    - minecraft:flower_default
-    - minecraft:patch_grass_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:warped_mesa:
-  raw_generation:
-    '@set':
-    - terralith:valley/blue_terra
-    - terralith:valley/light_blue_terra
-    - terralith:valley/lime_terra
-    - terralith:valley/cyan_terra
-    - terralith:valley/purple_terra
-    - terralith:valley/green_terra
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_dirt
-    - minecraft:ore_gravel
-    - minecraft:ore_granite_upper
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_upper
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_upper
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:ore_gold_extra
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - minecraft:glow_lichen
-    - minecraft:patch_grass_badlands
-    - minecraft:patch_dead_bush_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane_badlands
-    - minecraft:patch_pumpkin
-    - minecraft:patch_cactus_decorated
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer
-terralith:white_cliffs:
-  raw_generation:
-    '@set':
-    - terralith:cliffs/white/calcitifier
-    - terralith:cliffs/white/diorite_seed
-    - terralith:cliffs/white/diorite_crack
-    - terralith:cliffs/white/andesite_seed
-    - terralith:cliffs/white/andesite_crack
-    - terralith:cliffs/white/moss_patch
-  lakes:
-    '@set':
-    - minecraft:lake_lava_underground
-    - minecraft:lake_lava_surface
-  local_modifications:
-    '@set':
-    - minecraft:amethyst_geode
-  underground_structures:
-    '@set':
-    - minecraft:monster_room
-    - minecraft:monster_room_deep
-  underground_ores:
-    '@set':
-    - minecraft:ore_granite_lower
-    - minecraft:ore_diorite_lower
-    - minecraft:ore_andesite_lower
-    - minecraft:ore_tuff
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:underwater_magma
-    - minecraft:disk_sand
-    - minecraft:disk_clay
-    - minecraft:disk_gravel
-  fluid_springs:
-    '@set':
-    - minecraft:spring_water
-    - minecraft:spring_lava
-  vegetal_decoration:
-    '@set':
-    - minecraft:glow_lichen
-    - terralith:cliffs/white/trees_small
-    - minecraft:flower_default
-    - minecraft:patch_grass_badlands
-    - minecraft:brown_mushroom_normal
-    - minecraft:red_mushroom_normal
-    - minecraft:patch_sugar_cane
-    - minecraft:patch_pumpkin
-  top_layer_modification:
-    '@set':
-    - minecraft:freeze_top_layer

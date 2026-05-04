@@ -1,19 +1,19 @@
 {
     "replace": false,
     "values": [
+        "minecraft:deep_frozen_ocean",
+        "minecraft:frozen_ocean",
         "minecraft:frozen_peaks",
         "minecraft:ice_spikes",
         "minecraft:snowy_plains",
-        "minecraft:snowy_taiga",
         "minecraft:snowy_slopes",
-        "minecraft:deep_frozen_ocean",
-        "minecraft:frozen_ocean",
+        "minecraft:snowy_taiga",
+        "terralith:frozen_cliffs",
         "terralith:glacial_chasm",
         "terralith:ice_marsh",
         "terralith:siberian_grove",
         "terralith:siberian_taiga",
         "terralith:snowy_badlands",
-        "terralith:snowy_cherry_grove",
-        "terralith:frozen_cliffs"
+        "terralith:snowy_cherry_grove"
     ]
 }
