@@ -65,22 +65,21 @@ def validate() -> int:
             issues += 1
         biome_features[biome_id] = [list(s) for s in feats]
 
-    # 2. Catalog-ore-leakage check (only for biomes that ARE in some tag;
-    #    untagged biomes are intentionally left alone by apply.py).
+    # 2. Catalog-ore-leakage check: NO biome JSON should contain any
+    #    catalog ore (apply.py strips them from every biome, tagged or
+    #    not, to avoid FeatureSorter cycles between biome JSON ordering
+    #    and biome_modifier-injected ordering).
     on_disk = set(biome_features)
     raw_tags = load_all_endeavour_tags(on_disk_ids=on_disk)
-    tagged_biomes = {b for ids in raw_tags.values() for b in ids}
     leaked: dict[str, list[str]] = {}
     for biome_id, steps in biome_features.items():
-        if biome_id not in tagged_biomes:
-            continue
         for step in steps:
             for f in step:
                 if f in catalog:
                     leaked.setdefault(biome_id, []).append(f)
     if leaked:
-        print(f"WARN: {len(leaked)} tagged biome(s) still contain catalog "
-              f"ores in their JSON. Re-run apply.py to strip them:",
+        print(f"WARN: {len(leaked)} biome(s) still contain catalog ores "
+              f"in their JSON. Re-run apply.py to strip them:",
               file=sys.stderr)
         for biome_id, ores in sorted(leaked.items())[:5]:
             print(f"  {biome_id}: {ores[:5]}{'...' if len(ores) > 5 else ''}",
@@ -166,18 +165,44 @@ def validate() -> int:
                   f"with tool-generated <tag>__<step>.json files on next run.",
                   file=sys.stderr)
 
-    # 6. Cross-biome ordering check
-    for i, step in enumerate(GENERATION_STEPS):
+    # 6. RUNTIME ordering check: simulate NeoForge applying biome_modifiers
+    # in alphabetical order on top of biome JSONs, then look for cycles
+    # across the resulting per-biome feature lists. This is what MC's
+    # FeatureSorter checks at world load; failing it here prevents
+    # "Feature order cycle found" crashes in the actual game.
+    runtime_modifiers: list[tuple[str, str, list[str]]] = []
+    for f in sorted(ENDEAVOUR_BIOME_MODIFIER_DIR.glob("*.json")):
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if data.get("type") != "neoforge:add_features":
+            continue
+        biomes_field = data.get("biomes", "")
+        step = data.get("step", "")
+        feats_field = data.get("features", [])
+        if not isinstance(biomes_field, str) or not biomes_field.startswith("#endeavour:"):
+            continue
+        if step not in GENERATION_STEPS:
+            continue
+        feats = [feats_field] if isinstance(feats_field, str) else list(feats_field)
+        runtime_modifiers.append((biomes_field[len("#endeavour:"):], step, feats))
+
+    cycle_count = 0
+    for step_idx, step in enumerate(GENERATION_STEPS):
         edges: dict[str, set[str]] = {}
         nodes_order: list[str] = []
-        seen: set[str] = set()
+        seen_node: set[str] = set()
         for biome_id, steps in biome_features.items():
-            if i >= len(steps):
-                continue
-            seq = steps[i]
+            seq = list(steps[step_idx]) if step_idx < len(steps) else []
+            for tag, mstep, feats in runtime_modifiers:
+                if mstep != step:
+                    continue
+                if biome_id in raw_tags.get(tag, set()):
+                    seq.extend(feats)
             for f in seq:
-                if f not in seen:
-                    seen.add(f)
+                if f not in seen_node:
+                    seen_node.add(f)
                     nodes_order.append(f)
                 edges.setdefault(f, set())
             for a, b in zip(seq, seq[1:]):
@@ -197,8 +222,12 @@ def validate() -> int:
                     ready.append(m)
         if len(emitted) != len(nodes_order):
             cyc = [n for n in nodes_order if n not in emitted]
-            print(f"WARN: ordering cycle at step '{step}': "
-                  f"{cyc[:5]}{'...' if len(cyc) > 5 else ''}", file=sys.stderr)
+            print(f"FAIL: runtime ordering cycle at step '{step}' (would crash "
+                  f"with 'Feature order cycle found'): "
+                  f"{cyc[:8]}{'...' if len(cyc) > 8 else ''}", file=sys.stderr)
+            cycle_count += 1
+    if cycle_count:
+        issues += cycle_count
 
     print()
     if issues:

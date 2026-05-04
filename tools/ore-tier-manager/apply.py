@@ -92,23 +92,24 @@ def main() -> int:
     biome_overrides = yaml_load(BIOME_OVERRIDES_PATH)
     existing = load_existing()
 
-    # Only strip ores from biomes that participate in at least one tag.
-    # Untagged biomes (e.g. terralith:skylands_* which aren't in any
-    # endeavour tag) are left as-is - the tool has no opinion on their
-    # ore distribution. Assign them to a tag in the GUI to bring them
-    # under tool management.
+    # Strip catalog ores from EVERY biome JSON, including ones in zero
+    # endeavour tags. Otherwise an untagged biome keeps its Terralith
+    # default ores at positions that conflict with the biome_modifier
+    # ordering used for tagged biomes, and MC's FeatureSorter rejects
+    # the world with "Feature order cycle found" on first chunk gen.
+    #
+    # Practically: untagged biomes end up with no catalog ores at all.
+    # That's the tool's design ("tool entirely drives ore distribution").
+    # To bring an untagged biome under tool management, add it to a tag
+    # in the GUI; otherwise it generates with no ores.
     on_disk = set(existing)
     tags = load_all_endeavour_tags(on_disk_ids=on_disk)
     tags_by_biome = biome_to_tags(tags)
-    tagged_biomes = set(tags_by_biome)
-    untagged = sorted(on_disk - tagged_biomes)
+    untagged = sorted(on_disk - set(tags_by_biome))
 
-    # 1. Compute biome JSON changes (strip catalog ores from tagged biomes)
     json_changes: list[tuple[str, list[tuple[str, str, str]]]] = []
     biome_writes: list[tuple[Path, OrderedDict, list[list[str]]]] = []
     for biome_id in sorted(existing):
-        if biome_id not in tagged_biomes:
-            continue  # leave untagged biomes alone
         path, data, before = existing[biome_id]
         after = strip_catalog_ores(before, catalog)
         if before == after:
@@ -171,15 +172,14 @@ def main() -> int:
     print()
     print(f"  biomes:           {len(existing)} read, "
           f"{len(json_changes)} stripped, "
-          f"{len(tagged_biomes) - len(json_changes)} tagged-but-clean, "
-          f"{len(untagged)} untagged-skipped")
+          f"{len(existing) - len(json_changes)} clean")
     print(f"  biome_modifiers:  "
           f"{len(to_create)} added, "
           f"{len(to_update)} updated, "
           f"{len(to_delete)} removed, "
           f"{len(unchanged)} unchanged")
     if untagged and not args.quiet:
-        print(f"  untagged biomes (left alone): "
+        print(f"  untagged biomes (no ores at runtime): "
               f"{untagged[:5]}{'...' if len(untagged) > 5 else ''}")
     if args.dry_run:
         print("  (dry-run; no writes)")

@@ -48,28 +48,28 @@
     '@add':
     - minecraft:ore_coal_upper
     - minecraft:ore_coal_lower
+    - minecraft:ore_copper
     - minecraft:ore_iron_upper
     - minecraft:ore_iron_middle
     - minecraft:ore_iron_small
     - minecraft:ore_gold
     - minecraft:ore_gold_lower
+    - minecraft:ore_gold_extra
     - minecraft:ore_redstone
     - minecraft:ore_redstone_lower
     - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
     - minecraft:ore_diamond_large
     - minecraft:ore_diamond_buried
     - minecraft:ore_lapis
     - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:ore_diamond_medium
     - minecraft:ore_emerald
-    - wythers:ores/ore_iron_windswept
-    - wythers:ores/ore_coal_windswept
-    - wythers:ores/ore_redstone_windswept
-    - wythers:ores/ore_gold_volcanic
-    - wythers:ores/ore_diamond_volcanic
     - terralith:cave/fungal/ore_coal_extra
-    - minecraft:ore_gold_extra
+    - wythers:ores/ore_coal_windswept
+    - wythers:ores/ore_iron_windswept
+    - wythers:ores/ore_redstone_windswept
+    - wythers:ores/ore_diamond_volcanic
+    - wythers:ores/ore_gold_volcanic
 '#endeavour:tier_4':
   local_modifications:
     '@add':
@@ -79,11 +79,13 @@
     '@add':
     - minecraft:ore_coal_upper
     - minecraft:ore_coal_lower
+    - minecraft:ore_copper
     - minecraft:ore_iron_upper
     - minecraft:ore_iron_middle
     - minecraft:ore_iron_small
     - minecraft:ore_gold
     - minecraft:ore_gold_lower
+    - minecraft:ore_gold_extra
     - minecraft:ore_redstone
     - minecraft:ore_redstone_lower
     - minecraft:ore_diamond
@@ -92,8 +94,6 @@
     - minecraft:ore_diamond_buried
     - minecraft:ore_lapis
     - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-    - minecraft:ore_gold_extra
     - minecraft:ore_emerald
 '#endeavour:tier_1':
   local_modifications:
@@ -103,63 +103,19 @@
     '@add':
     - minecraft:ore_coal_upper
     - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
     - minecraft:ore_copper
-    - minecraft:ore_diamond_medium
     - minecraft:ore_copper_large
+    - minecraft:ore_iron_upper
+    - minecraft:ore_iron_middle
+    - minecraft:ore_iron_small
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
     - minecraft:ore_emerald
-'#endeavour:volcanic_zone':
-  local_modifications:
-    '@add':
-    - minecraft:amethyst_geode
-  underground_ores:
-    '@add':
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper
-'#endeavour:amethyst_zone':
-  local_modifications:
-    '@add':
-    - minecraft:amethyst_geode
-  underground_ores:
-    '@add':
-    - minecraft:ore_coal_upper
-    - minecraft:ore_coal_lower
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_copper

@@ -40,6 +40,7 @@ from common import (
     biome_to_tags,
     load_all_endeavour_tags,
     load_ore_catalog,
+    load_ore_catalog_ordered,
     yaml_dump,
 )
 
@@ -87,40 +88,33 @@ def load_existing_features() -> dict[str, list[list[str]]]:
 def per_tag_unassigned_union(
     biomes_in_tag: list[tuple[str, list[list[str]]]],
     catalog: set[str],
+    catalog_order: list[str],
     already_assigned: dict[str, dict[int, set[str]]],
 ) -> dict[str, list[str]]:
     """Per step: UNION of catalog ores across biomes in this tag, minus
-    ores already claimed by a previously-processed tag.
+    ores already claimed by a previously-processed tag, emitted in
+    catalog order.
 
-    `already_assigned[biome_id][step_idx]` tracks per-biome ores already
-    covered by an earlier tag. The caller updates this after each tag's
-    claim so subsequent tags don't re-claim, which prevents NeoForge
-    from add_features-stacking the same ore from multiple modifiers
-    (which would multi-spawn at runtime).
-
-    Why union and not intersection? Intersection would silently drop any
-    ore that doesn't appear in EVERY biome of the tag. With current
-    Terralith-shaped data, that loses ~750 ore-instances. Union is more
-    forgiving: a tag claims any catalog ore present in any of its biomes
-    that isn't already covered. Some biomes may gain ores they didn't
-    previously have (which the user will see in the apply diff and can
-    adjust by removing the ore from the tag in the GUI).
+    Catalog ordering is critical: NeoForge applies multiple
+    biome_modifiers to a biome and the resulting per-step feature list
+    must have a consistent cross-biome ordering. If tier_2 emits ores
+    in one order and tier_4 in another, biomes that share ores via the
+    union of their tag memberships hit MC's FeatureSorter cycle check
+    ("Feature order cycle found"). Sorting every tag's emission by
+    catalog position guarantees they all agree.
     """
+    catalog_index = {ore: i for i, ore in enumerate(catalog_order)}
     out: dict[str, list[str]] = {}
     for i, step in enumerate(GENERATION_STEPS):
         union: set[str] = set()
-        first_appearance: list[str] = []
-        seen: set[str] = set()
         for biome_id, feats in biomes_in_tag:
             biome_step = feats[i] if i < len(feats) else []
             covered = already_assigned.get(biome_id, {}).get(i, set())
             for f in biome_step:
-                if f in catalog and f not in covered and f not in seen:
-                    seen.add(f)
-                    first_appearance.append(f)
+                if f in catalog and f not in covered:
                     union.add(f)
-        if first_appearance:
-            out[step] = first_appearance
+        if union:
+            out[step] = sorted(union, key=lambda f: catalog_index.get(f, 1 << 30))
     return out
 
 
@@ -131,6 +125,7 @@ def main() -> int:
     args = parser.parse_args()
 
     catalog = load_ore_catalog()
+    catalog_order = load_ore_catalog_ordered()
     feats = load_existing_features()
     on_disk = set(feats)
     tags = load_all_endeavour_tags(on_disk_ids=on_disk)
@@ -210,7 +205,7 @@ def main() -> int:
         if not biomes_in_tag:
             continue
         per_step = per_tag_unassigned_union(
-            biomes_in_tag, catalog, already_assigned)
+            biomes_in_tag, catalog, catalog_order, already_assigned)
         if not per_step:
             continue
         entry = bo.setdefault(f"#endeavour:{tag}", OrderedDict())

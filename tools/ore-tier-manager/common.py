@@ -137,10 +137,17 @@ def biome_to_tags(tags_by_name: dict[str, set[str]]) -> dict[str, list[str]]:
 # --- ore catalog ----------------------------------------------------------
 
 def load_ore_catalog() -> set[str]:
-    """Return the flat set of ore feature IDs from ore_catalog.yaml.
+    """Return the flat set of ore feature IDs from ore_catalog.yaml."""
+    return set(load_ore_catalog_ordered())
 
-    The YAML's top-level keys are organizational categories (vanilla,
-    create, immersiveengineering, etc.); we union all their lists.
+
+def load_ore_catalog_ordered() -> list[str]:
+    """Return the ore catalog as an ordered list, preserving YAML order.
+
+    Used as the canonical order for emitting ores across tags. If two
+    biome_modifiers add overlapping ores, both must use the same relative
+    order to satisfy MC's FeatureSorter; sorting by catalog position
+    guarantees consistency.
     """
     if not ORE_CATALOG_PATH.exists():
         raise FileNotFoundError(
@@ -148,13 +155,15 @@ def load_ore_catalog() -> set[str]:
         )
     with ORE_CATALOG_PATH.open("r", encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
-    out: set[str] = set()
+    out: list[str] = []
+    seen: set[str] = set()
     for category, items in data.items():
         if not isinstance(items, list):
             continue
         for item in items:
-            if isinstance(item, str):
-                out.add(item)
+            if isinstance(item, str) and item not in seen:
+                seen.add(item)
+                out.append(item)
     return out
 
 
