@@ -32,7 +32,9 @@
         </select>
       </div>
       <div class="filter-row">
-        <input id="filter-entity" type="text" placeholder="Filter by entity (e.g. piglin, villager)…" autocomplete="off">
+        <select id="filter-entity">
+          <option value="">All entities</option>
+        </select>
       </div>
       <div class="filter-row">
         <label class="cb-label">
@@ -51,6 +53,10 @@
   <main id="viewer-panel">
     <div id="viewer-toolbar">
       <select id="piece-select"><option value="">— select piece —</option></select>
+      <label class="depth-label" title="Maximum jigsaw recursion depth (tier 1=7, tier 2=9, tier 3=11…)">
+        Depth <input id="depth-input" type="number" value="7" min="1" max="20" step="1">
+      </label>
+      <button id="btn-assemble" title="Simulate a full jigsaw generation run and render the assembled structure">Assemble</button>
       <button id="btn-reset-cam">Reset camera</button>
       <span id="viewer-info"></span>
     </div>

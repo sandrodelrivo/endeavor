@@ -213,6 +213,28 @@ select {
 
 #piece-select { max-width: 340px; font-size: 12px; }
 
+.depth-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.depth-label input[type="number"] {
+  width: 46px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 3px 6px;
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+}
+.depth-label input[type="number"]:focus { border-color: var(--accent); }
+.depth-label input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+
 #viewer-info {
   margin-left: auto;
   font-size: 11px;
@@ -402,3 +424,25 @@ button:hover { background: var(--border); border-color: var(--accent); }
 }
 #pieces-list li:hover { background: rgba(78,168,222,.1); }
 #pieces-list li.active-piece { background: rgba(78,168,222,.2); color: #fff; }
+#pieces-list li.piece-start { font-weight: 700; color: var(--text); }
+
+/* ── Entity scan progress bar ─────────────────────────────── */
+.scan-progress {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+.scan-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+@keyframes scan-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}

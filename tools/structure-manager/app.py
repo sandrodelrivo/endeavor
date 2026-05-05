@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 import assets as asset_mgr
 import config_manager
 import entities as ent
-from scanner import Indices, build_index, read_nbt_bytes
+from scanner import Indices, build_index, load_entity_cache, read_nbt_bytes, save_entity_cache
 
 app = FastAPI(title="Structure Manager", docs_url=None, redoc_url=None)
 
@@ -31,6 +31,7 @@ FRONTEND_DIR = Path(__file__).parent / "frontend"
 _index: Optional[Indices] = None
 _entities_ready = False
 _nbt_entity_cache: dict = {}
+_scan_progress: dict = {"phase": "idle", "done": 0, "total": 0, "pieces_done": 0}
 
 
 def _get_index() -> Indices:
@@ -44,16 +45,33 @@ def _get_index() -> Indices:
 # ---------------------------------------------------------------------------
 
 def _resolve_entities_background(idx: Indices) -> None:
-    global _entities_ready
-    print("  Resolving entities in background…")
-    try:
-        ent.resolve_entities_all(idx, _nbt_entity_cache)
+    global _entities_ready, _scan_progress
+
+    cache_hit, fingerprint = load_entity_cache(idx)
+    if cache_hit:
+        n = len(idx.structures)
+        print(f"  Cache hit — loaded entity/piece data for {n} structures.")
+        _scan_progress["done"] = n
+        _scan_progress["total"] = n
         _entities_ready = True
-        print(f"  Entity resolution complete.  "
-              f"{sum(1 for e in idx.structures.values() if e.entities)} structures have entities.")
+        return
+
+    print(f"  Resolving entities in background… ({len(idx.structures)} structures)")
+    _scan_progress["phase"] = "pieces"
+    _scan_progress["done"] = 0
+    _scan_progress["total"] = len(idx.structures)
+    _scan_progress["pieces_done"] = 0
+    try:
+        ent.resolve_entities_all(idx, _nbt_entity_cache, progress=_scan_progress)
+        _entities_ready = True
+        print(
+            f"  Entity resolution complete.  "
+            f"{sum(1 for e in idx.structures.values() if e.entities)} structures have entities."
+        )
+        save_entity_cache(idx, fingerprint)
     except Exception as exc:
         print(f"  Entity resolution failed: {exc}")
-        _entities_ready = True  # Mark done even on error so the UI unblocks
+        _entities_ready = True  # unblock UI even on error
 
 
 def _build_and_start_bg() -> Indices:
@@ -71,8 +89,10 @@ def _build_and_start_bg() -> Indices:
 
 @app.post("/api/rescan")
 def rescan() -> dict:
-    global _index, _nbt_entity_cache
+    global _index, _nbt_entity_cache, _entities_ready, _scan_progress
     _nbt_entity_cache = {}
+    _entities_ready = False
+    _scan_progress = {"done": 0, "total": 0}
     _index = _build_and_start_bg()
     return {"count": len(_index.structures), "entities_ready": _entities_ready}
 
@@ -96,6 +116,10 @@ def stats() -> dict:
         "with_villager": villager,
         "nbt_files": len(idx.nbt),
         "entities_ready": _entities_ready,
+        "scan_phase": _scan_progress["phase"],
+        "scan_done": _scan_progress["done"],
+        "scan_total": _scan_progress["total"],
+        "scan_pieces_done": _scan_progress["pieces_done"],
     }
 
 
@@ -160,6 +184,7 @@ def structure_details(id: str = Query(...)) -> dict:
         "enabled": enabled,
         "entities": entry.entities,
         "pieces": entry.nbt_pieces,
+        "all_pieces": entry.all_nbt_pieces if _entities_ready else [],
         "structure_type": entry.structure_data.get("type", "unknown"),
         "entities_ready": _entities_ready,
     }
@@ -184,6 +209,31 @@ def structure_render(
         raise HTTPException(500, f"Failed to read NBT: {exc}") from exc
 
     return ent.get_render_data(raw)
+
+
+@app.get("/api/entities")
+def list_entities() -> list[str]:
+    idx = _get_index()
+    found: set[str] = set()
+    for entry in idx.structures.values():
+        found.update(entry.entities)
+    return sorted(found)
+
+
+@app.get("/api/structure/jigsaw")
+def structure_jigsaw(
+    id: str = Query(...),
+    depth: int = Query(default=4),
+    seed: Optional[int] = Query(default=None),
+) -> dict:
+    idx = _get_index()
+    if id not in idx.structures:
+        raise HTTPException(404, f"Unknown structure: {id}")
+    from jigsaw_sim import simulate_jigsaw
+    result = simulate_jigsaw(id, idx, max_depth=min(depth, 20), seed=seed)
+    if "error" in result:
+        raise HTTPException(400, result["error"])
+    return result
 
 
 @app.post("/api/structure/set_enabled")

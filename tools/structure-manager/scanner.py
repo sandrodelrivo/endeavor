@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import zipfile
@@ -267,6 +268,74 @@ def build_index() -> Indices:
         entry.nbt_pieces = _resolve_pieces(entry, idx)
 
     return idx
+
+
+_CACHE_PATH = Path(__file__).parent / ".scan_cache.json"
+
+
+def _source_fingerprint() -> str:
+    """SHA-1 of all scanned source files' paths + mtime_ns + size."""
+    paths: list[Path] = []
+    vanilla = _find_vanilla_jar()
+    if vanilla:
+        paths.append(vanilla)
+    if MODS_DIR.exists():
+        paths.extend(sorted(MODS_DIR.glob("*.jar")))
+    if DATAPACK_DIR.exists():
+        paths.extend(sorted(f for f in DATAPACK_DIR.rglob("*") if f.is_file()))
+    parts: list[str] = []
+    for p in paths:
+        try:
+            st = p.stat()
+            parts.append(f"{p}|{st.st_mtime_ns}|{st.st_size}")
+        except OSError:
+            parts.append(f"{p}|missing")
+    return hashlib.sha1("\n".join(parts).encode()).hexdigest()
+
+
+def load_entity_cache(idx: Indices) -> tuple[bool, str]:
+    """Try to restore entity/piece data from disk cache.
+
+    Returns (cache_hit, fingerprint).  fingerprint is always returned so callers
+    can pass it to save_entity_cache regardless of hit/miss.
+    """
+    fp = _source_fingerprint()
+    if not _CACHE_PATH.exists():
+        return False, fp
+    try:
+        raw = json.loads(_CACHE_PATH.read_bytes())
+    except Exception:
+        return False, fp
+    if raw.get("fingerprint") != fp:
+        return False, fp
+    cached = raw.get("structures", {})
+    for rid, entry in idx.structures.items():
+        if rid in cached:
+            c = cached[rid]
+            entry.entities = c.get("entities", [])
+            entry.nbt_pieces = c.get("nbt_pieces", entry.nbt_pieces)
+            entry.all_nbt_pieces = c.get("all_nbt_pieces", [])
+    return True, fp
+
+
+def save_entity_cache(idx: Indices, fingerprint: str) -> None:
+    """Persist entity/piece data to disk cache."""
+    structures = {
+        rid: {
+            "entities": entry.entities,
+            "nbt_pieces": entry.nbt_pieces,
+            "all_nbt_pieces": entry.all_nbt_pieces,
+        }
+        for rid, entry in idx.structures.items()
+    }
+    try:
+        _CACHE_PATH.write_text(
+            json.dumps({"fingerprint": fingerprint, "structures": structures}),
+            encoding="utf-8",
+        )
+        print(f"  Cache saved ({len(structures)} structures).")
+    except Exception as exc:
+        print(f"  Cache write failed: {exc}")
 
 
 def read_nbt_bytes(ref: NbtRef) -> bytes:

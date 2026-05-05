@@ -250,7 +250,7 @@ def resolve_entities(entry: StructureEntry, idx: Indices) -> list[str]:
     return _sort_entities(found)
 
 
-def resolve_entities_all(idx: Indices, _nbt_cache: dict) -> None:
+def resolve_entities_all(idx: Indices, _nbt_cache: dict, progress: dict | None = None) -> None:
     """
     Resolve entities for every structure, following jigsaw connectors
     recursively through NBT pieces to find sub-structure entities.
@@ -296,27 +296,44 @@ def resolve_entities_all(idx: Indices, _nbt_cache: dict) -> None:
                     ref = idx.nbt[pid]
                     try:
                         raw = (DATAPACK_DIR / ref.internal).read_bytes()
-                        _piece_entities[pid] = _extract_from_nbt(raw)
-                        _piece_sub_pools[pid] = _extract_jigsaw_sub_pools(raw)
+                        if len(raw) > 8_000_000:
+                            print(f"  Skipping oversized NBT piece ({len(raw)//1024}KB): {pid}")
+                            _piece_entities[pid] = set()
+                            _piece_sub_pools[pid] = []
+                        else:
+                            _piece_entities[pid] = _extract_from_nbt(raw)
+                            _piece_sub_pools[pid] = _extract_jigsaw_sub_pools(raw)
                     except Exception:
                         _piece_entities[pid] = set()
                         _piece_sub_pools[pid] = []
+                    if progress is not None:
+                        progress["pieces_done"] = progress.get("pieces_done", 0) + 1
             else:
                 try:
                     with zipfile.ZipFile(jar_path, "r") as z:
                         for pid in piece_ids:
                             ref = idx.nbt[pid]
                             try:
-                                raw = z.read(ref.internal)
-                                _piece_entities[pid] = _extract_from_nbt(raw)
-                                _piece_sub_pools[pid] = _extract_jigsaw_sub_pools(raw)
+                                info = z.getinfo(ref.internal)
+                                if info.file_size > 8_000_000:
+                                    print(f"  Skipping oversized NBT piece ({info.file_size//1024}KB): {pid}")
+                                    _piece_entities[pid] = set()
+                                    _piece_sub_pools[pid] = []
+                                else:
+                                    raw = z.read(ref.internal)
+                                    _piece_entities[pid] = _extract_from_nbt(raw)
+                                    _piece_sub_pools[pid] = _extract_jigsaw_sub_pools(raw)
                             except Exception:
                                 _piece_entities[pid] = set()
                                 _piece_sub_pools[pid] = []
+                            if progress is not None:
+                                progress["pieces_done"] = progress.get("pieces_done", 0) + 1
                 except Exception:
                     for pid in piece_ids:
                         _piece_entities.setdefault(pid, set())
                         _piece_sub_pools.setdefault(pid, [])
+                        if progress is not None:
+                            progress["pieces_done"] = progress.get("pieces_done", 0) + 1
 
         # Expand: find new pieces reachable via jigsaw sub-pools in this wave
         next_work: set[str] = set()
@@ -333,9 +350,16 @@ def resolve_entities_all(idx: Indices, _nbt_cache: dict) -> None:
         work_set = next_work
 
     # -------------------------------------------------------------------
-    # Phase 2: Assign entities to each structure via per-structure BFS
+    # Phase 2: Assign entities + full piece list to each structure
     # -------------------------------------------------------------------
-    for entry in idx.structures.values():
+    all_entries = list(idx.structures.values())
+    total = len(all_entries)
+    if progress is not None:
+        progress["phase"] = "structures"
+        progress["total"] = total
+        progress["done"] = 0
+
+    for i, entry in enumerate(all_entries):
         found: set[str] = set()
         if _structure_implies_villagers(entry):
             found.add("minecraft:villager")
@@ -357,6 +381,11 @@ def resolve_entities_all(idx: Indices, _nbt_cache: dict) -> None:
                         s_queue.append(new_pid)
 
         entry.entities = _sort_entities(found)
+        # All pieces reachable from this structure (start pool + sub-pools via jigsaw blocks)
+        entry.all_nbt_pieces = sorted(s_visited_pieces)
+
+        if progress is not None:
+            progress["done"] = i + 1
 
 
 # ---------------------------------------------------------------------------

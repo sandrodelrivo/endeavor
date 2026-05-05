@@ -16,7 +16,8 @@
       "Bash(python)",
       "Bash(echo \"exit=$?\")",
       "Bash(cp -r datapack-worldgen/zzz_endeavour_worldgen/data /tmp/snap)",
-      "Bash(cp -r tools/ore-tier-manager/config /tmp/snap_config)"
+      "Bash(cp -r tools/ore-tier-manager/config /tmp/snap_config)",
+      "Bash(tasklist /FI \"IMAGENAME eq python.exe\" /FO CSV)"
     ]
   }
 }

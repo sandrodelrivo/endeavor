@@ -16,6 +16,8 @@ const listEl        = document.getElementById("structure-list");
 const searchEl      = document.getElementById("search");
 const filterSource  = document.getElementById("filter-source");
 const filterEntity  = document.getElementById("filter-entity");
+const btnAssemble   = document.getElementById("btn-assemble");
+const depthInput    = document.getElementById("depth-input");
 const filterDisabled= document.getElementById("filter-disabled");
 const statsBar      = document.getElementById("stats-bar");
 const spawnToggle   = document.getElementById("spawn-toggle");
@@ -75,11 +77,27 @@ async function apiPost(path) {
 async function refreshStats() {
   try {
     const s = await api("/api/stats");
-    const entityNote = s.entities_ready
-      ? `· ${s.with_villager} with villager`
-      : `· <em style="color:var(--warn)">scanning entities…</em>`;
+    const scanDone       = s.scan_done        ?? 0;
+    const scanTotal      = s.scan_total       ?? 0;
+    const scanPiecesDone = s.scan_pieces_done ?? 0;
+    const scanPhase      = s.scan_phase       ?? "idle";
+
+    let entityNote, progressBar = "";
+    if (s.entities_ready) {
+      entityNote = `· ${s.with_villager} with villager`;
+    } else if (scanPhase === "pieces") {
+      entityNote = `· <span style="color:var(--warn)">building jigsaw graph… (${scanPiecesDone} pieces)</span>`;
+      progressBar = `<div class="scan-progress"><div class="scan-progress-fill" style="width:5%;animation:scan-pulse 1.2s ease-in-out infinite"></div></div>`;
+    } else if (scanPhase === "structures" && scanTotal > 0) {
+      const pct = Math.round(100 * scanDone / scanTotal);
+      entityNote = `· <span style="color:var(--warn)">${scanDone}/${scanTotal} structures</span>`;
+      progressBar = `<div class="scan-progress"><div class="scan-progress-fill" style="width:${pct}%"></div></div>`;
+    } else {
+      entityNote = `· <span style="color:var(--warn)">scanning entities…</span>`;
+    }
+
     statsBar.innerHTML =
-      `${s.total} structures · ${s.enabled} enabled · ${s.disabled} disabled ${entityNote}`;
+      `${s.total} structures · ${s.enabled} enabled · ${s.disabled} disabled ${entityNote}${progressBar}`;
   } catch (e) {
     statsBar.textContent = "Stats unavailable";
   }
@@ -223,7 +241,30 @@ async function selectStructure(id) {
   }
 }
 
-function renderInfoPanel(d) {
+function _buildPieceList(pieces, startPieces) {
+  // startPieces: Set of top-level start-pool pieces (bolded in list)
+  piecesList.innerHTML = "";
+  pieceSelect.innerHTML = `<option value="">— select piece —</option>`;
+
+  for (const piece of pieces) {
+    const isStart = startPieces.has(piece);
+    const li = document.createElement("li");
+    li.textContent = piece;
+    li.title = "Click to preview in 3-D viewer";
+    if (isStart) li.classList.add("piece-start");
+    li.addEventListener("click", () => loadPiece(piece, li));
+    piecesList.appendChild(li);
+
+    const opt = document.createElement("option");
+    opt.value = piece;
+    const short = piece.split(":").pop().split("/").pop();
+    const label = short + " (" + piece.split(":")[0] + ")" + (isStart ? " ★" : "");
+    opt.textContent = label;
+    pieceSelect.appendChild(opt);
+  }
+}
+
+function renderInfoPanel(d, { skipAutoLoad = false } = {}) {
   infoPlaceholder.hidden = true;
   infoContent.hidden = false;
 
@@ -250,34 +291,19 @@ function renderInfoPanel(d) {
     entityList.appendChild(li);
   }
 
-  // NBT pieces — populate both the info-panel list and the toolbar dropdown
-  pieceCount.textContent = d.pieces.length;
-  piecesList.innerHTML = "";
-  piecesNone.hidden = d.pieces.length > 0;
+  // NBT pieces — prefer all_pieces (full BFS) over top-level pieces when available
+  const displayPieces = (d.all_pieces && d.all_pieces.length > 0) ? d.all_pieces : d.pieces;
+  const startSet = new Set(d.pieces);
 
-  // Toolbar dropdown
-  pieceSelect.innerHTML = `<option value="">— select piece —</option>`;
+  pieceCount.textContent = displayPieces.length;
+  piecesNone.hidden = displayPieces.length > 0;
+  _buildPieceList(displayPieces, startSet);
 
-  for (const piece of d.pieces) {
-    // Info panel list
-    const li = document.createElement("li");
-    li.textContent = piece;
-    li.title = "Click to preview in 3-D viewer";
-    li.addEventListener("click", () => loadPiece(piece, li));
-    piecesList.appendChild(li);
+  if (skipAutoLoad) return;
 
-    // Dropdown
-    const opt = document.createElement("option");
-    opt.value = piece;
-    const short = piece.split(":").pop().split("/").pop();
-    opt.textContent = short + " (" + piece.split(":")[0] + ")";
-    pieceSelect.appendChild(opt);
-  }
-
-  // Auto-load first piece
-  if (d.pieces.length > 0) {
+  if (displayPieces.length > 0) {
     const firstLi = piecesList.firstElementChild;
-    loadPiece(d.pieces[0], firstLi);
+    loadPiece(displayPieces[0], firstLi);
   } else {
     clearViewer();
     viewerPlaceholder.classList.remove("hidden");
@@ -337,10 +363,64 @@ searchEl.addEventListener("input", () => {
 filterSource.addEventListener("change", loadList);
 filterDisabled.addEventListener("change", loadList);
 
-let entityFilterTimer;
-filterEntity.addEventListener("input", () => {
-  clearTimeout(entityFilterTimer);
-  entityFilterTimer = setTimeout(loadList, 300);
+filterEntity.addEventListener("change", loadList);
+
+// ── Entity dropdown population ─────────────────────────────
+
+async function loadEntityDropdown() {
+  try {
+    const entities = await api("/api/entities");
+    const current = filterEntity.value;
+    filterEntity.innerHTML = `<option value="">All entities</option>`;
+    for (const eid of entities) {
+      const opt = document.createElement("option");
+      opt.value = eid;
+      const short = eid.split(":").pop();
+      opt.textContent = short + " (" + eid.split(":")[0] + ")";
+      opt.title = eid;
+      filterEntity.appendChild(opt);
+    }
+    if (current) filterEntity.value = current;
+  } catch (_) {}
+}
+
+// ── Jigsaw assembly ───────────────────────────────────────
+
+let _lastAssemblySeed = null;
+
+async function runAssemble(seed = null) {
+  if (!selectedId) return;
+  viewerPlaceholder.classList.add("hidden");
+  showLoading("Simulating jigsaw assembly…");
+  try {
+    const depth = Math.max(1, Math.min(20, parseInt(depthInput.value, 10) || 7));
+    let url = `/api/structure/jigsaw?id=${encodeURIComponent(selectedId)}&depth=${depth}`;
+    if (seed !== null) url += `&seed=${seed}`;
+    const data = await api(url);
+    if (data.error) throw new Error(data.error);
+    renderStructure(data);
+    _lastAssemblySeed = data.seed ?? null;
+    const cap = data.capped ? " (capped)" : "";
+    const seedStr = _lastAssemblySeed !== null ? ` · seed ${_lastAssemblySeed}` : "";
+    viewerInfo.innerHTML =
+      `${data.blocks.length.toLocaleString()} blocks · ${data.pieces_placed} pieces${cap}${seedStr}`;
+    selectedPiece = null;
+    pieceSelect.value = "";
+    piecesList.querySelectorAll("li").forEach(li => li.classList.remove("active-piece"));
+  } catch (e) {
+    clearViewer();
+    viewerPlaceholder.classList.remove("hidden");
+    viewerPlaceholder.querySelector("p").textContent = `Assemble failed: ${e.message}`;
+    viewerInfo.textContent = "";
+  } finally {
+    hideLoading();
+  }
+}
+
+btnAssemble.addEventListener("click", () => runAssemble());
+btnAssemble.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  if (_lastAssemblySeed !== null) runAssemble(_lastAssemblySeed);
 });
 
 // ── Rescan ─────────────────────────────────────────────────
@@ -378,6 +458,24 @@ document.getElementById("btn-disable-all").addEventListener("click", async () =>
   hideLoading();
 });
 
+// ── Refresh info panel without resetting viewer ────────────
+
+async function refreshSelectedDetails() {
+  if (!selectedId) return;
+  try {
+    const d = await api(`/api/structure/details?id=${encodeURIComponent(selectedId)}`);
+    // Re-render panel, skipping the auto-load so the current piece stays in view
+    renderInfoPanel(d, { skipAutoLoad: true });
+    // Restore active highlight + dropdown selection for current piece
+    if (selectedPiece) {
+      const li = Array.from(piecesList.querySelectorAll("li"))
+        .find(el => el.textContent === selectedPiece || el.textContent.startsWith(selectedPiece));
+      if (li) li.classList.add("active-piece");
+      pieceSelect.value = selectedPiece;
+    }
+  } catch (_) {}
+}
+
 // ── Entity-readiness polling ───────────────────────────────
 
 let _pollTimer = null;
@@ -389,18 +487,20 @@ async function pollEntityReady() {
     if (s.entities_ready) {
       clearInterval(_pollTimer);
       _pollTimer = null;
-      // Reload list to show entity counts and villager flags
       await loadList();
+      await loadEntityDropdown();
+      await refreshSelectedDetails();
     }
   } catch (_) {}
 }
 
 // ── Init ───────────────────────────────────────────────────
 loadList().then(async () => {
-  // Check if entities are already ready; if not, poll every 2s
   try {
     const s = await api("/api/stats");
-    if (!s.entities_ready) {
+    if (s.entities_ready) {
+      await loadEntityDropdown();
+    } else {
       _pollTimer = setInterval(pollEntityReady, 2000);
     }
   } catch (_) {}
