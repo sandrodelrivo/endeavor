@@ -4,14 +4,20 @@
         "minecraft:badlands",
         "minecraft:desert",
         "minecraft:eroded_badlands",
+        "minecraft:warm_ocean",
         "minecraft:wooded_badlands",
+        "terralith:ashen_savanna",
+        "terralith:basalt_cliffs",
         "terralith:bryce_canyon",
+        "terralith:caldera",
+        "terralith:deep_warm_ocean",
         "terralith:desert_canyon",
         "terralith:desert_oasis",
         "terralith:desert_spires",
         "terralith:lush_desert",
         "terralith:painted_mountains",
         "terralith:red_oasis",
-        "terralith:sandstone_valley"
+        "terralith:sandstone_valley",
+        "terralith:warm_river"
     ]
 }

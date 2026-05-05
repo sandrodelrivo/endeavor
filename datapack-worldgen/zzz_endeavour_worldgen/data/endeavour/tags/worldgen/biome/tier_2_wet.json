@@ -1,0 +1,23 @@
+{
+    "replace": false,
+    "values": [
+        "endeavour:cave/fungal_caves_t2",
+        "endeavour:cave/underground_jungle_t2",
+        "minecraft:bamboo_jungle",
+        "minecraft:cherry_grove",
+        "minecraft:cold_ocean",
+        "minecraft:deep_cold_ocean",
+        "minecraft:flower_forest",
+        "minecraft:jungle",
+        "minecraft:mangrove_swamp",
+        "minecraft:mushroom_fields",
+        "minecraft:sparse_jungle",
+        "minecraft:stony_shore",
+        "terralith:amethyst_rainforest",
+        "terralith:jungle_mountains",
+        "terralith:lush_valley",
+        "terralith:orchid_swamp",
+        "terralith:rocky_jungle",
+        "terralith:tropical_jungle"
+    ]
+}

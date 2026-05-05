@@ -134,36 +134,24 @@ def validate() -> int:
             print(f"  {tag}: {ids[:5]}{'...' if len(ids) > 5 else ''}",
                   file=sys.stderr)
 
-    # 5. Orphan endeavour biome_modifier files
+    # 5. Orphan endeavour biome_modifier files: anything in the dir
+    # that doesn't follow the tool's `<step>__<hash>.json` naming
+    # pattern is either legacy (pre-equivalence-class architecture)
+    # or hand-edited and should be flagged.
     if ENDEAVOUR_BIOME_MODIFIER_DIR.exists():
-        bo = yaml_load(BIOME_OVERRIDES_PATH) if BIOME_OVERRIDES_PATH.exists() else {}
-        expected: set[str] = set()
-        for key, steps in bo.items():
-            if not isinstance(key, str) or not key.startswith("#endeavour:"):
-                continue
-            if not isinstance(steps, dict):
-                continue
-            tag = key[len("#endeavour:"):]
-            for step in steps:
-                if any(extract_features(steps[step])):
-                    expected.add(f"{tag}__{step}.json")
         actual = {f.name for f in ENDEAVOUR_BIOME_MODIFIER_DIR.glob("*.json")}
-        orphans = actual - expected
-        # Allow legacy 06_*-10_* files; flag others
-        legacy = {n for n in orphans if n[:2].isdigit() and "_" in n}
-        true_orphans = orphans - legacy
-        if true_orphans:
-            print(f"WARN: {len(true_orphans)} orphan biome_modifier file(s) in "
-                  f"{ENDEAVOUR_BIOME_MODIFIER_DIR.relative_to(DATAPACK_ROOT)} "
-                  f"(not produced by current biome_overrides.yaml; re-run apply):",
-                  file=sys.stderr)
-            for n in sorted(true_orphans)[:5]:
+        valid_step_prefixes = tuple(f"{s}__" for s in GENERATION_STEPS)
+        orphans = {
+            n for n in actual
+            if not (n.startswith(valid_step_prefixes) and n.endswith(".json"))
+        }
+        if orphans:
+            print(f"NOTE: {len(orphans)} biome_modifier file(s) don't match "
+                  f"the tool's `<step>__<hash>.json` pattern. apply.py will "
+                  f"leave them alone - delete or rename them if they're "
+                  f"stale:", file=sys.stderr)
+            for n in sorted(orphans)[:5]:
                 print(f"  {n}", file=sys.stderr)
-        if legacy:
-            print(f"NOTE: {len(legacy)} legacy biome_modifier file(s) "
-                  f"(06_*-10_*) still present. apply.py will replace them "
-                  f"with tool-generated <tag>__<step>.json files on next run.",
-                  file=sys.stderr)
 
     # 6. RUNTIME ordering check: simulate NeoForge applying biome_modifiers
     # in alphabetical order on top of biome JSONs, then look for cycles
@@ -187,6 +175,38 @@ def validate() -> int:
             continue
         feats = [feats_field] if isinstance(feats_field, str) else list(feats_field)
         runtime_modifiers.append((biomes_field[len("#endeavour:"):], step, feats))
+
+    # 6a. Per-biome duplicate detection: a feature appearing twice in
+    # one biome's runtime list creates an unsatisfiable A->B->A
+    # constraint that MC reports as a single-biome "Feature order cycle."
+    dup_count = 0
+    for biome_id, steps in biome_features.items():
+        for step_idx, step in enumerate(GENERATION_STEPS):
+            seq = list(steps[step_idx]) if step_idx < len(steps) else []
+            for tag, mstep, feats in runtime_modifiers:
+                if mstep != step:
+                    continue
+                if biome_id in raw_tags.get(tag, set()):
+                    seq.extend(feats)
+            seen_in_biome: set[str] = set()
+            dups: list[str] = []
+            for f in seq:
+                if f in seen_in_biome:
+                    dups.append(f)
+                seen_in_biome.add(f)
+            if dups:
+                source_tags = {f: [t for t, ms, feats in runtime_modifiers
+                                   if ms == step and f in feats
+                                   and biome_id in raw_tags.get(t, set())]
+                               for f in set(dups)}
+                for f, contribs in source_tags.items():
+                    print(f"FAIL: {biome_id} @ {step}: feature {f!r} "
+                          f"appears multiple times (contributed by tags "
+                          f"{contribs}). Remove from one of those tags.",
+                          file=sys.stderr)
+                    dup_count += 1
+    if dup_count:
+        issues += dup_count
 
     cycle_count = 0
     for step_idx, step in enumerate(GENERATION_STEPS):

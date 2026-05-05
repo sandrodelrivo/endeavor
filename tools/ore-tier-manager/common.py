@@ -297,38 +297,94 @@ def strip_catalog_ores(features: list[list[str]],
 def biome_modifier_files(
     biome_overrides: dict,
     catalog: set[str],
+    catalog_order: list[str],
+    tags_by_biome: dict[str, list[str]],
 ) -> dict[str, dict]:
-    """Compute the biome_modifier file content for each (tag, step) pair.
+    """Resolve to per-biome ore sets, then group biomes by equivalence.
 
-    Returns {filename: json_content}. Filename is `<tag>__<step>.json`,
-    lowercase. JSON content is a NeoForge `neoforge:add_features` block.
+    Why not one biome_modifier per (tag, step)?
 
-    Only `#endeavour:<tag>` keys in biome_overrides are read; biome-id
-    keys are ignored (they shouldn't appear in the new architecture).
-    Only catalog-listed features are emitted; any non-ore feature in
-    the YAML is silently dropped (validate.py warns on this).
+    NeoForge `add_features` modifiers don't dedupe and don't enforce
+    cross-biome ordering. If a biome is in multiple tags, it receives
+    each tag's modifier in alphabetical ResourceLocation order, and
+    the relative position of any given ore depends on which tag
+    provided it. Different biomes have different tag combinations -
+    so a single ore can land at different relative positions across
+    biomes, creating MC `FeatureSorter` cycles even when no biome
+    has a literal duplicate.
+
+    The fix: ignore tag boundaries at apply time. For each biome,
+    compute the union of ore lists from every tag it belongs to,
+    sort by catalog position so cross-biome ordering is identical,
+    then group biomes by their resulting ore-tuple. Each unique
+    (step, ordered-ore-tuple) gets one modifier targeting all
+    biomes that share that ore set.
+
+    Effects:
+      - Each biome matches exactly one modifier per step. No double
+        injection regardless of how many tags it's in.
+      - Every biome's ore list is in canonical catalog order. No
+        cross-biome ordering disagreement.
+      - Same ore can appear in multiple input tags freely; the tool
+        merges them automatically.
+
+    Returns {filename: json_content}. Filenames use a deterministic
+    hash to remain stable across runs (no churn from set ordering).
     """
-    out: dict[str, dict] = {}
-    for key, steps in biome_overrides.items():
-        if not isinstance(key, str) or not key.startswith("#endeavour:"):
-            continue
-        tag = key[len("#endeavour:"):]
-        if not isinstance(steps, dict):
-            continue
-        for step, block in steps.items():
-            if step not in STEP_INDEX:
-                raise ValueError(
-                    f"#endeavour:{tag}: unknown step {step!r}. "
-                    f"Valid: {GENERATION_STEPS}"
-                )
-            features = [f for f in extract_features(block) if f in catalog]
-            if not features:
+    import hashlib
+
+    catalog_index = {ore: i for i, ore in enumerate(catalog_order)}
+
+    # 1. Per (biome, step), compute the union of catalog ores from
+    # every tag the biome belongs to.
+    per_biome_step: dict[str, dict[str, list[str]]] = {}
+    for biome_id, tags in tags_by_biome.items():
+        per_step: dict[str, set[str]] = {}
+        for tag in tags:
+            tag_block = biome_overrides.get(f"#endeavour:{tag}")
+            if not isinstance(tag_block, dict):
                 continue
-            filename = f"{tag}__{step}.json"
-            out[filename] = {
-                "type": "neoforge:add_features",
-                "biomes": f"#endeavour:{tag}",
-                "features": features if len(features) > 1 else features[0],
-                "step": step,
-            }
+            for step, op_block in tag_block.items():
+                if step not in STEP_INDEX:
+                    raise ValueError(
+                        f"#endeavour:{tag}: unknown step {step!r}. "
+                        f"Valid: {GENERATION_STEPS}"
+                    )
+                for f in extract_features(op_block):
+                    if f in catalog:
+                        per_step.setdefault(step, set()).add(f)
+        # Sort each step's ores by catalog position
+        ordered: dict[str, list[str]] = {}
+        for step, ore_set in per_step.items():
+            ordered[step] = sorted(
+                ore_set, key=lambda f: catalog_index.get(f, 1 << 30)
+            )
+        if ordered:
+            per_biome_step[biome_id] = ordered
+
+    # 2. Group biomes by (step, ordered_ore_tuple).
+    groups: dict[tuple[str, tuple[str, ...]], list[str]] = {}
+    for biome_id, per_step in per_biome_step.items():
+        for step, ores in per_step.items():
+            key = (step, tuple(ores))
+            groups.setdefault(key, []).append(biome_id)
+
+    # 3. Emit one modifier per group.
+    out: dict[str, dict] = {}
+    for (step, ore_tuple), biomes in sorted(groups.items()):
+        # Hash the ore tuple for stable, content-derived filenames.
+        digest = hashlib.sha1(
+            "|".join(ore_tuple).encode("utf-8")
+        ).hexdigest()[:8]
+        filename = f"{step}__{digest}.json"
+        biomes_field = (sorted(biomes) if len(biomes) > 1
+                        else sorted(biomes)[0])
+        features_field = (list(ore_tuple) if len(ore_tuple) > 1
+                          else ore_tuple[0])
+        out[filename] = {
+            "type": "neoforge:add_features",
+            "biomes": biomes_field,
+            "features": features_field,
+            "step": step,
+        }
     return out

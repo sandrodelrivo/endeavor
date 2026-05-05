@@ -39,6 +39,7 @@ from common import (
     detect_format,
     load_all_endeavour_tags,
     load_ore_catalog,
+    load_ore_catalog_ordered,
     strip_catalog_ores,
     write_json_preserving,
     yaml_load,
@@ -117,9 +118,14 @@ def main() -> int:
         json_changes.append((biome_id, diff_features(before, after)))
         biome_writes.append((path, data, after))
 
-    # 2. Compute biome_modifier file set
+    # 2. Compute biome_modifier file set (per-biome ore-set resolution +
+    # equivalence-class grouping; each biome matches exactly one
+    # modifier per step, ores in catalog order)
+    catalog_order = load_ore_catalog_ordered()
     try:
-        modifiers = biome_modifier_files(biome_overrides, catalog)
+        modifiers = biome_modifier_files(
+            biome_overrides, catalog, catalog_order, tags_by_biome
+        )
     except ValueError as e:
         print(f"ERROR resolving biome_modifiers: {e}", file=sys.stderr)
         return 3

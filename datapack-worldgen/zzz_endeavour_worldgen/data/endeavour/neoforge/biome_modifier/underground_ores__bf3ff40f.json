@@ -1,0 +1,21 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:cold_ocean",
+    "minecraft:deep_cold_ocean",
+    "minecraft:stony_shore"
+  ],
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_copper",
+    "minecraft:ore_lapis",
+    "minecraft:ore_lapis_buried",
+    "minecraft:ore_emerald",
+    "minecraft:amethyst_geode",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept",
+    "create:zinc_ore"
+  ],
+  "step": "underground_ores"
+}

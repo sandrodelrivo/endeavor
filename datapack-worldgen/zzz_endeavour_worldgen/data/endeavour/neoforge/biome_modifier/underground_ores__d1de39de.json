@@ -1,0 +1,20 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "terralith:gravel_desert",
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_diamond",
+    "minecraft:ore_diamond_medium",
+    "minecraft:ore_diamond_large",
+    "minecraft:ore_diamond_buried",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept",
+    "create_new_age:thorium_ore",
+    "immersiveengineering:bauxite",
+    "immersiveengineering:nickel",
+    "immersiveengineering:deep_nickel",
+    "immersivepetroleum:reservoir"
+  ],
+  "step": "underground_ores"
+}

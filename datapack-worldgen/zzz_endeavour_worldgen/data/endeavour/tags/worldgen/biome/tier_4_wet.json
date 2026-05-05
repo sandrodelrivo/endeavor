@@ -1,0 +1,19 @@
+{
+    "replace": false,
+    "values": [
+        "minecraft:grove",
+        "minecraft:snowy_beach",
+        "minecraft:snowy_taiga",
+        "minecraft:warm_ocean",
+        "terralith:alpine_grove",
+        "terralith:basalt_cliffs",
+        "terralith:cloud_forest",
+        "terralith:deep_warm_ocean",
+        "terralith:frozen_cliffs",
+        "terralith:granite_cliffs",
+        "terralith:siberian_grove",
+        "terralith:siberian_taiga",
+        "terralith:warm_river",
+        "terralith:white_cliffs"
+    ]
+}

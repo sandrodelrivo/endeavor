@@ -1,0 +1,33 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "endeavour:cave/thermal_caves_t2",
+    "minecraft:deep_lukewarm_ocean",
+    "minecraft:lukewarm_ocean",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "terralith:arid_highlands",
+    "terralith:hot_shrubland",
+    "terralith:rocky_shrubland",
+    "terralith:savanna_badlands",
+    "terralith:savanna_slopes",
+    "terralith:volcanic_crater",
+    "terralith:volcanic_peaks"
+  ],
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_copper",
+    "minecraft:ore_gold",
+    "minecraft:ore_gold_lower",
+    "minecraft:ore_gold_extra",
+    "minecraft:ore_redstone",
+    "minecraft:ore_redstone_lower",
+    "minecraft:ore_emerald",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept",
+    "wythers:ores/ore_redstone_windswept",
+    "wythers:ores/ore_gold_volcanic"
+  ],
+  "step": "underground_ores"
+}

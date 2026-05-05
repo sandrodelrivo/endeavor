@@ -1,0 +1,20 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "terralith:amethyst_canyon",
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_copper",
+    "minecraft:ore_diamond",
+    "minecraft:ore_diamond_medium",
+    "minecraft:ore_diamond_large",
+    "minecraft:ore_diamond_buried",
+    "minecraft:ore_emerald",
+    "minecraft:amethyst_geode",
+    "terralith:cave/fungal/ore_coal_extra",
+    "terralith:mountains/emerald/emerald_geode",
+    "wythers:ores/ore_coal_windswept",
+    "wythers:ores/ore_diamond_volcanic"
+  ],
+  "step": "underground_ores"
+}

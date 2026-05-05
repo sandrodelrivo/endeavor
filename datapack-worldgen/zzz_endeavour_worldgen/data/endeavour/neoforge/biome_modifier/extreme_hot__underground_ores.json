@@ -1,9 +1,0 @@
-{
-  "type": "neoforge:add_features",
-  "biomes": "#endeavour:extreme_hot",
-  "features": [
-    "create_new_age:thorium_ore",
-    "immersivepetroleum:reservoir"
-  ],
-  "step": "underground_ores"
-}

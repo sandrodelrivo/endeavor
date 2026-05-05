@@ -1,0 +1,39 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "endeavour:cave/andesite_caves_t2",
+    "endeavour:cave/deep_caves_t2",
+    "endeavour:cave/diorite_caves_t2",
+    "endeavour:cave/frostfire_caves_t2",
+    "endeavour:cave/granite_caves_t2",
+    "endeavour:cave/infested_caves_t2",
+    "endeavour:cave/mantle_caves_t2",
+    "endeavour:cave/tuff_caves_t2",
+    "endeavour:dripstone_caves_t2",
+    "endeavour:lush_caves_t2",
+    "minecraft:stony_peaks",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_hills",
+    "terralith:lavender_forest",
+    "terralith:moonlight_grove",
+    "terralith:moonlight_valley",
+    "terralith:rocky_mountains",
+    "terralith:sakura_grove",
+    "terralith:sakura_valley",
+    "terralith:scarlet_mountains",
+    "terralith:shrubland",
+    "terralith:white_mesa",
+    "terralith:yosemite_cliffs",
+    "terralith:yosemite_lowlands"
+  ],
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_copper",
+    "minecraft:ore_emerald",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept"
+  ],
+  "step": "underground_ores"
+}

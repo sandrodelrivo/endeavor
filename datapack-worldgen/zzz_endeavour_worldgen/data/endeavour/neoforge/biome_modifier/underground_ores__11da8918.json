@@ -1,13 +1,10 @@
 {
   "type": "neoforge:add_features",
-  "biomes": "#endeavour:tier_4",
+  "biomes": "terralith:amethyst_rainforest",
   "features": [
     "minecraft:ore_coal_upper",
     "minecraft:ore_coal_lower",
     "minecraft:ore_copper",
-    "minecraft:ore_iron_upper",
-    "minecraft:ore_iron_middle",
-    "minecraft:ore_iron_small",
     "minecraft:ore_gold",
     "minecraft:ore_gold_lower",
     "minecraft:ore_gold_extra",
@@ -19,7 +16,14 @@
     "minecraft:ore_diamond_buried",
     "minecraft:ore_lapis",
     "minecraft:ore_lapis_buried",
-    "minecraft:ore_emerald"
+    "minecraft:ore_emerald",
+    "minecraft:amethyst_geode",
+    "terralith:cave/fungal/ore_coal_extra",
+    "terralith:mountains/emerald/emerald_geode",
+    "wythers:ores/ore_coal_windswept",
+    "wythers:ores/ore_redstone_windswept",
+    "wythers:ores/ore_diamond_volcanic",
+    "wythers:ores/ore_gold_volcanic"
   ],
   "step": "underground_ores"
 }

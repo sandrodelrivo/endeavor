@@ -1,0 +1,22 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "terralith:white_cliffs",
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_copper",
+    "minecraft:ore_diamond",
+    "minecraft:ore_diamond_medium",
+    "minecraft:ore_diamond_large",
+    "minecraft:ore_diamond_buried",
+    "minecraft:ore_emerald",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept",
+    "create_new_age:magnetite_block",
+    "createnuclear:uranium_ore",
+    "immersiveengineering:bauxite",
+    "immersiveengineering:nickel",
+    "immersiveengineering:deep_nickel"
+  ],
+  "step": "underground_ores"
+}

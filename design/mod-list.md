@@ -47,14 +47,13 @@ Markers:
 
 | Mod | Role | Notes |
 |-----|------|-------|
-| Terralith * | Biome variety [hard] | Datapack-as-mod via lowcodefml |
+| Terralith * | Biome variety [hard] | KIND OF. Technically the mod is not in the pack. Its data has been ripped and integrated into the custom zzz_endeavour_worldgen datapack so we can modify ore spawns in biomes. |
 | Continents * | Continental landmass shape [hard] | |
-| William Wythers' Overhauled Overworld * | Additional biome variety [hard] | |
+| William Wythers' Overhauled Overworld * | Additional biome variety [hard] | KIND OF. Technically the mod is not in the pack. Its data has been ripped and integrated into the custom zzz_endeavour_worldgen datapack so we can modify ore spawns in biomes. |
 | Distant Horizons | Render-distance extension [opt] | Performance critical for our world size |
 | Structurify | Structure spawn control [hard] | |
 | More Density Functions | Adds `moredfs:x`, `moredfs:z`, `moredfs:sin`, `moredfs:cos`, `moredfs:mod`, etc. [hard] | Required for the toroidal climate density functions; vanilla 1.21.1 has no primitive that reads world X or Z. |
 | Noisium (Forked) | Worldgen perf [lib] | |
-| Ore Veines+ | More control over Ore Vein generation | |
 
 ## Travel and survival
 

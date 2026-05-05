@@ -26,20 +26,6 @@
 # Only ores in config/ore_catalog.yaml are valid here. Non-catalog
 # features get silently dropped at apply time and are flagged by validate.py.
 
-'#endeavour:mesa_family':
-  underground_ores:
-    '@add':
-    - create:zinc_ore
-'#endeavour:extreme_cold':
-  underground_ores:
-    '@add':
-    - createnuclear:uranium_ore
-    - immersivepetroleum:reservoir
-'#endeavour:extreme_hot':
-  underground_ores:
-    '@add':
-    - create_new_age:thorium_ore
-    - immersivepetroleum:reservoir
 '#endeavour:tier_2':
   local_modifications:
     '@add':
@@ -49,27 +35,9 @@
     - minecraft:ore_coal_upper
     - minecraft:ore_coal_lower
     - minecraft:ore_copper
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_gold_extra
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
     - minecraft:ore_emerald
     - terralith:cave/fungal/ore_coal_extra
     - wythers:ores/ore_coal_windswept
-    - wythers:ores/ore_iron_windswept
-    - wythers:ores/ore_redstone_windswept
-    - wythers:ores/ore_diamond_volcanic
-    - wythers:ores/ore_gold_volcanic
 '#endeavour:tier_4':
   local_modifications:
     '@add':
@@ -79,22 +47,8 @@
     '@add':
     - minecraft:ore_coal_upper
     - minecraft:ore_coal_lower
-    - minecraft:ore_copper
-    - minecraft:ore_iron_upper
-    - minecraft:ore_iron_middle
-    - minecraft:ore_iron_small
-    - minecraft:ore_gold
-    - minecraft:ore_gold_lower
-    - minecraft:ore_gold_extra
-    - minecraft:ore_redstone
-    - minecraft:ore_redstone_lower
-    - minecraft:ore_diamond
-    - minecraft:ore_diamond_medium
-    - minecraft:ore_diamond_large
-    - minecraft:ore_diamond_buried
-    - minecraft:ore_lapis
-    - minecraft:ore_lapis_buried
-    - minecraft:ore_emerald
+    - terralith:cave/fungal/ore_coal_extra
+    - wythers:ores/ore_coal_windswept
 '#endeavour:tier_1':
   local_modifications:
     '@add':
@@ -108,3 +62,62 @@
     - minecraft:ore_iron_upper
     - minecraft:ore_iron_middle
     - minecraft:ore_iron_small
+    - terralith:cave/fungal/ore_coal_extra
+    - wythers:ores/ore_coal_windswept
+    - wythers:ores/ore_iron_windswept
+'#endeavour:tier_2_hot':
+  underground_ores:
+    '@add':
+    - minecraft:ore_gold
+    - minecraft:ore_gold_lower
+    - minecraft:ore_gold_extra
+    - wythers:ores/ore_gold_volcanic
+    - minecraft:ore_redstone
+    - minecraft:ore_redstone_lower
+    - wythers:ores/ore_redstone_windswept
+'#endeavour:tier_2_cold':
+  underground_ores:
+    '@add':
+    - create:zinc_ore
+    - minecraft:amethyst_geode
+'#endeavour:tier_2_wet':
+  underground_ores:
+    '@add':
+    - minecraft:ore_lapis
+    - minecraft:ore_lapis_buried
+'#endeavour:tier_4_cold':
+  underground_ores:
+    '@add':
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - immersiveengineering:nickel
+    - immersiveengineering:deep_nickel
+    - immersiveengineering:bauxite
+'#endeavour:tier_4_hot':
+  underground_ores:
+    '@add':
+    - wythers:ores/ore_diamond_volcanic
+    - immersiveengineering:silver
+    - createnuclear:lead_ore
+'#endeavour:tier_4_dry':
+  underground_ores:
+    '@add':
+    - immersivepetroleum:reservoir
+    - create_new_age:thorium_ore
+'#endeavour:tier_4_wet':
+  underground_ores:
+    '@add':
+    - createnuclear:uranium_ore
+    - create_new_age:magnetite_block
+'#endeavour:amethyst_zone':
+  underground_ores:
+    '@add':
+    - minecraft:amethyst_geode
+    - terralith:mountains/emerald/emerald_geode
+    - minecraft:ore_diamond
+    - minecraft:ore_diamond_medium
+    - minecraft:ore_diamond_large
+    - minecraft:ore_diamond_buried
+    - wythers:ores/ore_diamond_volcanic

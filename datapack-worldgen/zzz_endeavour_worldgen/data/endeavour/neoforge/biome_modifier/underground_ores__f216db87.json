@@ -1,0 +1,24 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:frozen_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:snowy_slopes",
+    "terralith:cold_shrubland",
+    "terralith:snowy_maple_forest",
+    "terralith:stony_spires",
+    "terralith:windswept_spires",
+    "terralith:yellowstone"
+  ],
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "minecraft:ore_copper",
+    "minecraft:ore_emerald",
+    "minecraft:amethyst_geode",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept",
+    "create:zinc_ore"
+  ],
+  "step": "underground_ores"
+}

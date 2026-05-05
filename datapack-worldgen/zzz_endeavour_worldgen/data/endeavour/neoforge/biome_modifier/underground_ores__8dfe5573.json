@@ -1,0 +1,30 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:desert",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
+    "terralith:ashen_savanna",
+    "terralith:bryce_canyon",
+    "terralith:desert_canyon",
+    "terralith:desert_oasis",
+    "terralith:desert_spires",
+    "terralith:lush_desert",
+    "terralith:painted_mountains",
+    "terralith:red_oasis",
+    "terralith:sandstone_valley"
+  ],
+  "features": [
+    "minecraft:ore_coal_upper",
+    "minecraft:ore_coal_lower",
+    "terralith:cave/fungal/ore_coal_extra",
+    "wythers:ores/ore_coal_windswept",
+    "wythers:ores/ore_diamond_volcanic",
+    "create_new_age:thorium_ore",
+    "createnuclear:lead_ore",
+    "immersiveengineering:silver",
+    "immersivepetroleum:reservoir"
+  ],
+  "step": "underground_ores"
+}
