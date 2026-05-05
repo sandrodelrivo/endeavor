@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Structure Manager — Endeavour</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- ── Left sidebar ─────────────────────────────────────── -->
+  <aside id="sidebar">
+    <header class="sidebar-header">
+      <span class="logo">⛏ Structure Manager</span>
+      <button id="btn-rescan" title="Re-scan all JARs and datapack">↺ Rescan</button>
+    </header>
+
+    <div class="filter-bar">
+      <input id="search" type="text" placeholder="Search structures…" autocomplete="off">
+      <div class="filter-row">
+        <select id="filter-source">
+          <option value="">All sources</option>
+          <option value="mod">Mods</option>
+          <option value="datapack">Datapack</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <input id="filter-entity" type="text" placeholder="Filter by entity (e.g. piglin, villager)…" autocomplete="off">
+      </div>
+      <div class="filter-row">
+        <label class="cb-label">
+          <input id="filter-disabled" type="checkbox"> Show disabled only
+        </label>
+        <button id="btn-disable-all" class="btn-danger" title="Disable every visible structure">Disable all visible</button>
+      </div>
+    </div>
+
+    <div id="stats-bar"></div>
+
+    <ul id="structure-list"></ul>
+  </aside>
+
+  <!-- ── 3-D viewer ────────────────────────────────────────── -->
+  <main id="viewer-panel">
+    <div id="viewer-toolbar">
+      <select id="piece-select"><option value="">— select piece —</option></select>
+      <button id="btn-reset-cam">Reset camera</button>
+      <span id="viewer-info"></span>
+    </div>
+    <canvas id="three-canvas"></canvas>
+    <div id="viewer-placeholder">
+      <p>Select a structure from the sidebar<br>to preview it here.</p>
+    </div>
+  </main>
+
+  <!-- ── Right info panel ──────────────────────────────────── -->
+  <aside id="info-panel">
+    <div id="info-placeholder">
+      <p>No structure selected.</p>
+    </div>
+    <div id="info-content" hidden>
+      <h2 id="info-name"></h2>
+      <div class="info-meta" id="info-meta"></div>
+
+      <div class="toggle-row">
+        <span>Can spawn</span>
+        <label class="switch">
+          <input type="checkbox" id="spawn-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <section class="info-section">
+        <h3>Entities <span id="entity-count" class="badge"></span></h3>
+        <ul id="entity-list"></ul>
+        <p id="entity-none" class="muted" hidden>None detected.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>NBT Pieces <span id="piece-count" class="badge"></span></h3>
+        <ul id="pieces-list"></ul>
+        <p id="pieces-none" class="muted" hidden>None found.</p>
+      </section>
+    </div>
+  </aside>
+
+  <script type="module" src="viewer.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

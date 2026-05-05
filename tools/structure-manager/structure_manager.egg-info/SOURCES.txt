@@ -1,0 +1,6 @@
+pyproject.toml
+structure_manager.egg-info/PKG-INFO
+structure_manager.egg-info/SOURCES.txt
+structure_manager.egg-info/dependency_links.txt
+structure_manager.egg-info/requires.txt
+structure_manager.egg-info/top_level.txt
