@@ -1,0 +1,26 @@
+{
+  "backups": {
+    "terralith:fortified_desert_village": "#terralith:has_structure/fortified_desert_village",
+    "terralith:fortified_village": "#terralith:has_structure/fortified_village",
+    "terralith:glacial_hut": "terralith:glacial_chasm",
+    "terralith:mage_complex": "#terralith:has_structure/mage_complex",
+    "terralith:mage_tower": "#terralith:has_structure/mage_tower",
+    "terralith:mage_tower_autumn": "terralith:skylands_autumn",
+    "terralith:mage_tower_spring": "terralith:skylands_spring",
+    "terralith:mage_tower_summer": "terralith:skylands_summer",
+    "terralith:mage_tower_winter": "terralith:skylands_winter",
+    "terralith:valley_lodge": "#terralith:has_structure/valley_lodge"
+  },
+  "disabled": [
+    "terralith:fortified_desert_village",
+    "terralith:fortified_village",
+    "terralith:glacial_hut",
+    "terralith:mage_complex",
+    "terralith:mage_tower",
+    "terralith:mage_tower_autumn",
+    "terralith:mage_tower_spring",
+    "terralith:mage_tower_summer",
+    "terralith:mage_tower_winter",
+    "terralith:valley_lodge"
+  ]
+}
