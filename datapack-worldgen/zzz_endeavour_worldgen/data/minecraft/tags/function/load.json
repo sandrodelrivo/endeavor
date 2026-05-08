@@ -3,6 +3,7 @@
     {
       "id": "terralith:setup",
       "required": false
-    }
+    },
+    "endeavour:load_worldgen"
   ]
 }
