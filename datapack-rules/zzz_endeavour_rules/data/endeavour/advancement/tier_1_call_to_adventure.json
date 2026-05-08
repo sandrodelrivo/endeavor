@@ -1,0 +1,35 @@
+{
+    "parent": "endeavour:tier_0_ordinary_world",
+    "criteria": {
+        "venturing": {
+            "conditions": {
+                "player": {
+                    "location": {
+                        "biomes": "#endeavour:tier_1"
+                    }
+                }
+            },
+            "trigger": "minecraft:location"
+        }
+    },
+    "display": {
+        "description": "Set foot in the world. Find your bearings in a Tier 1 biome.",
+        "frame": "task",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:compass"
+        },
+        "title": "The Call to Adventure",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "venturing"
+        ]
+    ],
+    "rewards": {
+        "experience": 50
+    }
+}

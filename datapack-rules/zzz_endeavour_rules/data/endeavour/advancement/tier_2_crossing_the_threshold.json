@@ -1,0 +1,35 @@
+{
+    "parent": "endeavour:tier_1_call_to_adventure",
+    "criteria": {
+        "travelled": {
+            "conditions": {
+                "player": {
+                    "location": {
+                        "biomes": "#endeavour:tier_2"
+                    }
+                }
+            },
+            "trigger": "minecraft:location"
+        }
+    },
+    "display": {
+        "description": "Reach a Tier 2 Biome",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:map"
+        },
+        "title": "Crossing the Threshold",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "travelled"
+        ]
+    ],
+    "rewards": {
+        "experience": 100
+    }
+}

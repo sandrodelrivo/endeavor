@@ -1,0 +1,35 @@
+{
+    "parent": "endeavour:tier_3_belly_of_the_whale",
+    "criteria": {
+        "endured": {
+            "conditions": {
+                "player": {
+                    "location": {
+                        "biomes": "#endeavour:tier_4"
+                    }
+                }
+            },
+            "trigger": "minecraft:location"
+        }
+    },
+    "display": {
+        "description": "Endure the wastes. Reach a Tier 4 biome.",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:iron_pickaxe"
+        },
+        "title": "The Road of Trials",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "endured"
+        ]
+    ],
+    "rewards": {
+        "experience": 300
+    }
+}

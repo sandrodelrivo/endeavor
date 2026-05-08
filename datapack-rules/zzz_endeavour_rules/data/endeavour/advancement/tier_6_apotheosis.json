@@ -1,0 +1,28 @@
+{
+    "parent": "endeavour:tier_5_ordeal",
+    "criteria": {
+        "ascend": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "display": {
+        "description": "Ascend beyond the world. The Aether awaits.",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:elytra"
+        },
+        "title": "Apotheosis",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "ascend"
+        ]
+    ],
+    "rewards": {
+        "experience": 1000
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "parent": "endeavour:base",
+    "criteria": {
+        "exists": {
+            "trigger": "minecraft:tick"
+        }
+    },
+    "display": {
+        "description": "You wake. The world that was — is gone.",
+        "frame": "task",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:grass_block"
+        },
+        "title": "The Ordinary World",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "exists"
+        ]
+    ],
+    "rewards": {
+        "experience": 10
+    }
+}

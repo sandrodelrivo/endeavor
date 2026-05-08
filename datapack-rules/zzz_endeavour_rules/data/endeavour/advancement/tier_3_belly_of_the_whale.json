@@ -1,0 +1,28 @@
+{
+    "parent": "endeavour:tier_2_crossing_the_threshold",
+    "criteria": {
+        "descend": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "display": {
+        "description": "Light the portal at world spawn. Descend.",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:obsidian"
+        },
+        "title": "Belly of the Whale",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "descend"
+        ]
+    ],
+    "rewards": {
+        "experience": 200
+    }
+}

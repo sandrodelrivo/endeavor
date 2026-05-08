@@ -1,0 +1,28 @@
+{
+    "parent": "endeavour:tier_4_road_of_trials",
+    "criteria": {
+        "slay": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "display": {
+        "description": "Run the gauntlet. Strike down what waits at the edge of the world.",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:end_crystal"
+        },
+        "title": "The Ordeal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "slay"
+        ]
+    ],
+    "rewards": {
+        "experience": 500
+    }
+}
