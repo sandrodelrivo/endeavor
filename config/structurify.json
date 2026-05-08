@@ -1,0 +1,154 @@
+{
+  "config_version": "2.0.22",
+  "config_datetime": "2026-04-28_21-12-24",
+  "general": {
+    "disable_all_structures": false,
+    "prevent_structure_overlap": false,
+    "enable_global_spacing_and_separation_modifier": false,
+    "global_spacing_and_separation_modifier": 1.0
+  },
+  "structure_namespaces": [],
+  "structures": [
+    {
+      "name": "minecraft:pillager_outpost",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:village_savanna",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:village_desert",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:village_plains",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:village_snowy",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:village_taiga",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:badlands_miner_outpost",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:ruined_portal",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:ruined_portal_desert",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:ruined_portal_jungle",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:ruined_portal_mountain",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:ruined_portal_nether",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:ruined_portal_ocean",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:illager_camp",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:illager_hideout",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:illager_manor",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:remnant_classic_village",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:remnant_ominous_shop",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_acacia",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_birch",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_cherry",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_dark_oak",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_desert",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_jungle",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_mangrove",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_oak",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_snowy",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_spruce",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:tavern_swamp",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:village_birch",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:village_jungle",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:village_swamp",
+      "is_disabled": true
+    },
+    {
+      "name": "nova_structures:well_birch",
+      "is_disabled": false
+    },
+    {
+      "name": "nova_structures:witch_villa",
+      "is_disabled": true
+    },
+    {
+      "name": "minecraft:stronghold",
+      "is_disabled": true
+    }
+  ],
+  "structure_sets": []
+}
