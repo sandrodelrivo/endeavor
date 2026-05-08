@@ -1,6 +1,9 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/andesite_caves_t2",
+        "endeavour:cave/diorite_caves_t2",
+        "endeavour:cave/frostfire_caves_t2",
         "minecraft:cold_ocean",
         "minecraft:deep_cold_ocean",
         "minecraft:frozen_peaks",

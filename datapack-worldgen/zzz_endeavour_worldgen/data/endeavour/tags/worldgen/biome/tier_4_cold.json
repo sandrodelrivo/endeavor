@@ -1,6 +1,8 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/diorite_caves_t4",
+        "endeavour:cave/frostfire_caves_t4",
         "minecraft:deep_frozen_ocean",
         "minecraft:frozen_ocean",
         "minecraft:frozen_river",

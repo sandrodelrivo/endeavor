@@ -1,6 +1,10 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/andesite_caves_t2",
+        "endeavour:cave/frostfire_caves_t2",
+        "endeavour:cave/granite_caves_t2",
+        "endeavour:cave/tuff_caves_t2",
         "minecraft:savanna",
         "minecraft:savanna_plateau",
         "minecraft:windswept_gravelly_hills",

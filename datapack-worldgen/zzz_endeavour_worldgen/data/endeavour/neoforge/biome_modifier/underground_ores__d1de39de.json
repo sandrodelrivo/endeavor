@@ -1,6 +1,9 @@
 {
   "type": "neoforge:add_features",
-  "biomes": "terralith:gravel_desert",
+  "biomes": [
+    "endeavour:cave/frostfire_caves_t4",
+    "terralith:gravel_desert"
+  ],
   "features": [
     "minecraft:ore_coal_upper",
     "minecraft:ore_coal_lower",

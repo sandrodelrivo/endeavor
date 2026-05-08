@@ -1,15 +1,16 @@
 {
   "type": "neoforge:add_features",
   "biomes": [
-    "terralith:blooming_plateau",
-    "terralith:blooming_valley",
-    "terralith:emerald_peaks"
+    "endeavour:cave/deep_caves_t4",
+    "endeavour:dripstone_caves_t4"
   ],
   "features": [
     "minecraft:ore_coal_upper",
     "minecraft:ore_coal_lower",
     "terralith:cave/fungal/ore_coal_extra",
-    "wythers:ores/ore_coal_windswept"
+    "wythers:ores/ore_coal_windswept",
+    "create_new_age:magnetite_block",
+    "createnuclear:uranium_ore"
   ],
   "step": "underground_ores"
 }

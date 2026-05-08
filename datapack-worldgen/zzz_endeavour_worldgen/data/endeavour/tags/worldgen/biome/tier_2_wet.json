@@ -1,8 +1,12 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/deep_caves_t2",
         "endeavour:cave/fungal_caves_t2",
+        "endeavour:cave/infested_caves_t2",
         "endeavour:cave/underground_jungle_t2",
+        "endeavour:dripstone_caves_t2",
+        "endeavour:lush_caves_t2",
         "minecraft:bamboo_jungle",
         "minecraft:cherry_grove",
         "minecraft:cold_ocean",

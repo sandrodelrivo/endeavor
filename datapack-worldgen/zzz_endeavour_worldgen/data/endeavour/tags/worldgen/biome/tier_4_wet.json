@@ -1,6 +1,12 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/deep_caves_t4",
+        "endeavour:cave/fungal_caves_t4",
+        "endeavour:cave/infested_caves_t4",
+        "endeavour:cave/underground_jungle_t4",
+        "endeavour:dripstone_caves_t4",
+        "endeavour:lush_caves_t4",
         "minecraft:grove",
         "minecraft:snowy_beach",
         "minecraft:snowy_taiga",

@@ -2,7 +2,9 @@
   "type": "neoforge:add_features",
   "biomes": [
     "endeavour:cave/fungal_caves_t2",
+    "endeavour:cave/infested_caves_t2",
     "endeavour:cave/underground_jungle_t2",
+    "endeavour:lush_caves_t2",
     "minecraft:bamboo_jungle",
     "minecraft:jungle",
     "minecraft:mangrove_swamp",

@@ -1,6 +1,8 @@
 {
   "type": "neoforge:add_features",
   "biomes": [
+    "endeavour:cave/granite_caves_t2",
+    "endeavour:cave/mantle_caves_t2",
     "endeavour:cave/thermal_caves_t2",
     "minecraft:deep_lukewarm_ocean",
     "minecraft:lukewarm_ocean",

@@ -1,15 +1,13 @@
 {
   "type": "neoforge:add_features",
-  "biomes": [
-    "terralith:blooming_plateau",
-    "terralith:blooming_valley",
-    "terralith:emerald_peaks"
-  ],
+  "biomes": "endeavour:cave/tuff_caves_t4",
   "features": [
     "minecraft:ore_coal_upper",
     "minecraft:ore_coal_lower",
     "terralith:cave/fungal/ore_coal_extra",
-    "wythers:ores/ore_coal_windswept"
+    "wythers:ores/ore_coal_windswept",
+    "create_new_age:thorium_ore",
+    "immersivepetroleum:reservoir"
   ],
   "step": "underground_ores"
 }

@@ -2,8 +2,12 @@
     "replace": false,
     "values": [
         "endeavour:cave/fungal_caves_t2",
+        "endeavour:cave/granite_caves_t2",
+        "endeavour:cave/infested_caves_t2",
+        "endeavour:cave/mantle_caves_t2",
         "endeavour:cave/thermal_caves_t2",
         "endeavour:cave/underground_jungle_t2",
+        "endeavour:lush_caves_t2",
         "minecraft:bamboo_jungle",
         "minecraft:deep_lukewarm_ocean",
         "minecraft:jungle",

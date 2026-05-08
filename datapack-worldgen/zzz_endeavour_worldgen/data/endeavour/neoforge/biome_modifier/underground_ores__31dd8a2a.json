@@ -1,16 +1,7 @@
 {
   "type": "neoforge:add_features",
   "biomes": [
-    "endeavour:cave/andesite_caves_t2",
-    "endeavour:cave/deep_caves_t2",
-    "endeavour:cave/diorite_caves_t2",
-    "endeavour:cave/frostfire_caves_t2",
-    "endeavour:cave/granite_caves_t2",
-    "endeavour:cave/infested_caves_t2",
-    "endeavour:cave/mantle_caves_t2",
     "endeavour:cave/tuff_caves_t2",
-    "endeavour:dripstone_caves_t2",
-    "endeavour:lush_caves_t2",
     "minecraft:stony_peaks",
     "minecraft:windswept_forest",
     "minecraft:windswept_gravelly_hills",

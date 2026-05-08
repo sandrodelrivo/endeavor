@@ -1,6 +1,7 @@
 {
   "type": "neoforge:add_features",
   "biomes": [
+    "endeavour:cave/granite_caves_t4",
     "minecraft:badlands",
     "minecraft:desert",
     "minecraft:eroded_badlands",

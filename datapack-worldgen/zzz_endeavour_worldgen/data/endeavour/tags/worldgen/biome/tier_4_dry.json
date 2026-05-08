@@ -1,6 +1,9 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/frostfire_caves_t4",
+        "endeavour:cave/granite_caves_t4",
+        "endeavour:cave/tuff_caves_t4",
         "minecraft:badlands",
         "minecraft:desert",
         "minecraft:eroded_badlands",

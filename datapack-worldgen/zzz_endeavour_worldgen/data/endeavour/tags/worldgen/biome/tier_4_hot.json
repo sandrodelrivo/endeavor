@@ -1,6 +1,13 @@
 {
     "replace": false,
     "values": [
+        "endeavour:cave/fungal_caves_t4",
+        "endeavour:cave/granite_caves_t4",
+        "endeavour:cave/infested_caves_t4",
+        "endeavour:cave/mantle_caves_t4",
+        "endeavour:cave/thermal_caves_t4",
+        "endeavour:cave/underground_jungle_t4",
+        "endeavour:lush_caves_t4",
         "minecraft:badlands",
         "minecraft:desert",
         "minecraft:eroded_badlands",
