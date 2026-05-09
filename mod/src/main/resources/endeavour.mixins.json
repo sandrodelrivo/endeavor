@@ -10,7 +10,8 @@
     "aeronautics.SteamVentGoggleMixin",
     "aeronautics.PropellerBearingGoggleMixin",
     "aeronautics.PropellerActorBehaviourGoggleMixin",
-    "sable.FloatingBlockControllerMixin"
+    "sable.FloatingBlockControllerMixin",
+    "vanilla.PortalShapeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
