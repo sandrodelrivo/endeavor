@@ -1,0 +1,9 @@
+{
+  "name": "Reachfarer's Codex",
+  "landing_text": "Field notes for explorers of the Endeavour. Read what you can. Survive what you must.",
+  "creative_tab": true,
+  "i18n": false,
+  "show_progress": false,
+  "use_resource_pack": true,
+  "model": "patchouli:book_brown"
+}

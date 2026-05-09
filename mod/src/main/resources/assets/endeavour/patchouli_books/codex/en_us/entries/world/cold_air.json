@@ -1,0 +1,24 @@
+{
+  "name": "The Northern Cold",
+  "category": "endeavour:world",
+  "icon": "minecraft:blue_ice",
+  "sortnum": 1,
+  "advancement": "endeavour:tier_2_crossing_the_threshold",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "The Northern Cold",
+      "text": "Past the hundredth marker north, the air bites. Past the thousandth, no machine has yet flown back.$(br2)Cold thins lifting gas. Frost rimes propeller blades. Even Levitite, that defiant stone, yields to whatever cold hand grips this country."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Reading the Toll",
+      "text": "Wear Engineer's Goggles to read the modifier on your machine.$(br2)$(thing)Cold Air Modifier$() reduces lift produced by a Hot Air Burner or Steam Vent.$(br2)$(thing)Frozen Blades Modifier$() reduces thrust produced by any propeller.$(br2)Levitite blocks dim with the same toll, though they wear no readout. Trust the propeller bearing's modifier as your gauge.$(br2)At $(c)-100%$(), no airborne craft of any design will hold its altitude."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Building for the Cold",
+      "text": "There is no insulation that defeats this climate. Heavier engines do not push harder. Larger envelopes do not lift more. The cold simply takes its share.$(br2)What works is redundancy. Bring spare envelopes. Bring three times the fuel you think you need. Plan landings before each leg, not when the altimeter starts to fall.$(br2)The cold respects preparation. Nothing else."
+    }
+  ]
+}

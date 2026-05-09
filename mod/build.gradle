@@ -16,10 +16,95 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
     mavenLocal()
+    mavenCentral()
+    maven { url = 'https://maven.neoforged.net/releases' }
+}
+
+// --- Compile-only deps from the running modpack -----------------------------
+// Aeronautics ships as a "bundled" jar that contains the real mod classes inside
+// META-INF/jarjar/. NeoForge unpacks those at runtime, but javac can't see them
+// unless we extract them first. The setupCompileLibs task pulls the bundled
+// jar plus sable from the local Modrinth profile, extracts the bundle's inner
+// jars, and drops everything into mod/libs/extracted/ for compileOnly use.
+//
+// Run `./gradlew setupCompileLibs` once after a fresh clone (or whenever the
+// upstream jars update) before the first compile.
+
+def modpackModsDir = providers.gradleProperty('endeavour.modpack.mods.dir')
+        .orElse(providers.environmentVariable('APPDATA').map { "${it}/ModrinthApp/profiles/Aetherian Skies/mods" })
+        .orElse('')
+
+def libsExtracted = layout.projectDirectory.dir('libs/extracted')
+
+tasks.register('setupCompileLibs') {
+    description = 'Pulls aeronautics + sable jars from the local modpack instance for compileOnly use.'
+    group = 'endeavour'
+
+    def srcDir = modpackModsDir.get()
+    def aeroBundle = file("${srcDir}/create-aeronautics-bundled-1.21.1-1.2.1.jar")
+    def sableJar = file("${srcDir}/sable-neoforge-1.21.1-1.2.2.jar")
+    def createJar = file("${srcDir}/create-1.21.1-6.0.10.jar")
+    def outDir = libsExtracted.asFile
+
+    inputs.file(aeroBundle).optional()
+    inputs.file(sableJar).optional()
+    inputs.file(createJar).optional()
+    outputs.dir(outDir)
+
+    doLast {
+        def required = [aeroBundle, sableJar, createJar]
+        if (required.any { !it.exists() }) {
+            throw new GradleException(
+                    "Could not find required jars in: ${srcDir}\n" +
+                            "Override with -Pendeavour.modpack.mods.dir=<path> or set APPDATA correctly.\n" +
+                            "Expected files:\n" +
+                            "  - create-aeronautics-bundled-1.21.1-1.2.1.jar\n" +
+                            "  - sable-neoforge-1.21.1-1.2.2.jar\n" +
+                            "  - create-1.21.1-6.0.10.jar"
+            )
+        }
+        outDir.deleteDir()
+        outDir.mkdirs()
+
+        // The aero bundle and the sable mod jar contain nested jars under
+        // META-INF/jarjar/ that hold the actual mod classes. Copy each top-
+        // level jar AND each nested jar flat into outDir. Create's classes
+        // sit at the jar root, so it's just copied as-is.
+        [aeroBundle, sableJar, createJar].each { jar ->
+            copy {
+                from jar
+                into outDir
+            }
+            copy {
+                from(zipTree(jar)) {
+                    include 'META-INF/jarjar/*.jar'
+                    eachFile { it.relativePath = new RelativePath(true, it.name) }
+                    includeEmptyDirs = false
+                }
+                into outDir
+            }
+        }
+
+        logger.lifecycle("setupCompileLibs: populated ${outDir}")
+        outDir.listFiles()?.sort()?.each { logger.lifecycle("  - ${it.name}") }
+    }
 }
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
+
+    // Compile-only deps populated by setupCompileLibs. Runtime classes are loaded
+    // from the user's actual modpack install via NeoForge's mod discovery, so
+    // these only need to resolve symbols at compile time.
+    compileOnly fileTree(dir: libsExtracted, include: '*.jar')
+
+    // NeoForge bundles MixinExtras at runtime, but it's not on the compile
+    // classpath of the userdev artifact. Pull the same version explicitly.
+    compileOnly "io.github.llamalad7:mixinextras-common:0.4.1"
+}
+
+tasks.named('compileJava').configure {
+    dependsOn 'setupCompileLibs'
 }
 
 // Token replacement for neoforge.mods.toml — values come from gradle.properties.

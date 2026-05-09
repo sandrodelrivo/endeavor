@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.endeavour.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "aeronautics.ServerBalloonLiftMixin",
+    "aeronautics.PropellerThrustMixin",
+    "aeronautics.HotAirBurnerGoggleMixin",
+    "aeronautics.SteamVentGoggleMixin",
+    "aeronautics.PropellerBearingGoggleMixin",
+    "aeronautics.PropellerActorBehaviourGoggleMixin",
+    "sable.FloatingBlockControllerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
