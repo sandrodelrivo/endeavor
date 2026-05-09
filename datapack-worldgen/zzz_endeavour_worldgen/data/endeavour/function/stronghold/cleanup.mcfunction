@@ -1,3 +1,3 @@
-# Releases the 20x20 chunk grid forceloaded by stronghold/check.
+# Releases the 11x11 chunk grid forceloaded by stronghold/check.
 
-forceload remove -160 -30160 159 -29841
+forceload remove -80 -30080 95 -29905
