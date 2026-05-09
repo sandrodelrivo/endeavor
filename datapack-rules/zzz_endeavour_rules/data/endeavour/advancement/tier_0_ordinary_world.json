@@ -23,6 +23,7 @@
         ]
     ],
     "rewards": {
-        "experience": 10
+        "experience": 10,
+        "function": "endeavour:give_codex"
     }
 }
