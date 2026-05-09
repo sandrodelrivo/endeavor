@@ -150,6 +150,13 @@ endeavour/
 └── textures-source/               ← Jon's hand-made ore textures, pre-migration
 ```
 
+## Build outputs
+
+Two build steps produce the artifacts the modpack consumes:
+
+- **Datapack zips**: run `python tools/rezip_datapacks.py` (stdlib only, no deps) to rebuild `datapack-rules/zzz_endeavour_rules.zip` and `datapack-worldgen/zzz_endeavour_worldgen.zip` from their source directories. Always use this script for these zips — Windows-native zip tools (Compress-Archive, .NET ZipFile, Send to compressed folder) write backslashes in entry paths, which silently break the pack on Linux servers.
+- **Mod jar**: run `./gradlew jar` from `mod/`. First run after a clone needs `./gradlew setupCompileLibs` to pull aero/sable/create classes from the local Modrinth profile (path overridable via `-Pendeavour.modpack.mods.dir=<path>`). Output at `mod/build/libs/endeavour-<version>.jar`.
+
 ## A note on tone
 
 This project is for fun. The friends are smart, the design is opinionated, and the standard is high. Don't be precious. Don't be cautious past the point of usefulness. If you find a bad call in the design, say so. If a mod combination is going to crash, say so. If you don't know something, say "I don't know" and search.

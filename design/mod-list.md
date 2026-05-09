@@ -113,3 +113,4 @@ Markers:
 |-----|------|-------|
 | endeavour | Server-specific content [hard] | Patchouli book, advancements, lore items, ignition rules |
 | Patchouli | Data-driven guidebook [hard] | Required by `endeavour` |
+| Patchouli Library | Inventory quick-access for Patchouli books [opt] | QoL addon — adds inventory buttons to open installed Patchouli books |
