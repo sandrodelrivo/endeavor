@@ -11,7 +11,8 @@
     "aeronautics.PropellerBearingGoggleMixin",
     "aeronautics.PropellerActorBehaviourGoggleMixin",
     "sable.FloatingBlockControllerMixin",
-    "vanilla.PortalShapeMixin"
+    "vanilla.PortalShapeMixin",
+    "vanilla.EnderEyeItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
