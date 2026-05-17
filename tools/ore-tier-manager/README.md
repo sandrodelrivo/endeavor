@@ -156,7 +156,7 @@ reservoir was historically there before mods moved it).
 `config/ore_catalog.yaml` lists every placed_feature ID the tool treats
 as an ore. The bootstrap catalog covers vanilla, WWOO biome-locked
 variants, Create / Create Nuclear / Create New Age / Immersive
-Engineering / Immersive Petroleum. Edit it to:
+Engineering / Create: Diesel. Edit it to:
 
 - Add a new modded ore the tool should manage. Save → reload the GUI →
   the ore appears in the picker.

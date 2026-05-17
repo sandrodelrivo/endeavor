@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DDD",
+    "DGD",
+    "DDD"
+  ],
+  "key": {
+    "D": { "item": "minecraft:cobblestone" },
+    "G": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "id": "endeavour:tribute_altar",
+    "count": 1
+  }
+}

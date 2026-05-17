@@ -1,0 +1,1 @@
+tellraw @a [{"text":"[ Monument ] ","color":"gold","bold":true},{"text":"Again. The tremor is longer this time. A sound carries up through the stone - low, resonant, old. The monument has not made that sound in a very long time.","color":"white"}]

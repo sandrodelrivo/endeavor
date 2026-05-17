@@ -93,8 +93,8 @@ def _build_palette_info(
 ) -> tuple[list[str], dict[int, str]]:
     """
     Returns:
-      palette_names  — list[str], block name for each state index
-      state_orient   — dict[int → orientation_string] for jigsaw states only
+      palette_names  - list[str], block name for each state index
+      state_orient   - dict[int → orientation_string] for jigsaw states only
     """
     names: list[str] = []
     orients: dict[int, str] = {}
@@ -123,12 +123,12 @@ def _extract_jigsaw_blocks(nbt: nbtlib.Compound) -> list[dict]:
     Return a list of jigsaw connector descriptors.
 
     Each descriptor:
-      pos         — [x, y, z] local position
-      direction   — outward facing direction string (from block state)
-      name        — this block's name (what child looks for as 'target')
-      target      — which name to look for in the child piece
-      pool        — template pool to draw the child from
-      joint       — "rollable" | "aligned"
+      pos         - [x, y, z] local position
+      direction   - outward facing direction string (from block state)
+      name        - this block's name (what child looks for as 'target')
+      target      - which name to look for in the child piece
+      pool        - template pool to draw the child from
+      joint       - "rollable" | "aligned"
     """
     palette = nbt.get("palette", [])
     _, state_orient = _build_palette_info(palette)
@@ -290,7 +290,7 @@ def _find_piece_with_connector(
         chosen = rng.choices(candidates, weights=[c[2] for c in candidates])[0]
         return chosen[0], chosen[1]
 
-    # No connector match — weighted random fallback to any piece
+    # No connector match - weighted random fallback to any piece
     if all_loadable:
         piece_id, _ = rng.choices(all_loadable, weights=[w for _, w in all_loadable])[0]
         return piece_id, None
@@ -321,12 +321,12 @@ def simulate_jigsaw(
     Simulate one jigsaw generation pass and return assembled block data.
 
     Returns:
-      blocks        — list of {pos:[x,y,z], type:str} in world space
-      size          — [sx, sy, sz] bounding box
-      pieces_placed — how many NBT pieces were used
-      capped        — True if MAX_PIECES or MAX_BLOCKS was hit
-      seed          — the RNG seed used (pass back in to reproduce)
-      error         — present (and str) if structure isn't jigsawable
+      blocks        - list of {pos:[x,y,z], type:str} in world space
+      size          - [sx, sy, sz] bounding box
+      pieces_placed - how many NBT pieces were used
+      capped        - True if MAX_PIECES or MAX_BLOCKS was hit
+      seed          - the RNG seed used (pass back in to reproduce)
+      error         - present (and str) if structure isn't jigsawable
     """
     entry = idx.structures.get(structure_id)
     if not entry:
@@ -334,7 +334,7 @@ def simulate_jigsaw(
 
     struct_type = entry.structure_data.get("type", "")
     if "jigsaw" not in struct_type:
-        return {"error": "Not a jigsaw structure — use the single-piece viewer."}
+        return {"error": "Not a jigsaw structure - use the single-piece viewer."}
 
     start_pool = entry.structure_data.get("start_pool")
     if not start_pool:
@@ -356,7 +356,7 @@ def simulate_jigsaw(
     all_blocks: list[dict] = []
     pieces_placed = 0
     capped = False
-    visited_piece_positions: set[tuple] = set()  # (piece_id, ox, oy, oz) — dedup
+    visited_piece_positions: set[tuple] = set()  # (piece_id, ox, oy, oz) - dedup
 
     def _place(piece_id: str, origin: list[int], rotation: int, depth: int) -> None:
         nonlocal pieces_placed, capped

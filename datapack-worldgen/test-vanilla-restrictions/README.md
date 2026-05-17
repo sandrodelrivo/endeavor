@@ -21,14 +21,14 @@ Pack ID: `test-vanilla-restrictions`. Namespace inside: `test`.
 
 ## Test setup
 
-1. Spin up a clean vanilla NeoForge 1.21.1 instance — **NO other mods**. Not even moredfs, not Ore Veines+, not Terralith.
+1. Spin up a clean vanilla NeoForge 1.21.1 instance - **NO other mods**. Not even moredfs, not Ore Veines+, not Terralith.
 2. Drop this pack's zip into the world's `datapacks/` folder before world creation, OR use the world creation screen's data pack picker.
-3. Create a new world — default seed is fine.
+3. Create a new world - default seed is fine.
 4. Test by digging in each target biome.
 
 ## What the result tells us
 
-**Phase ordering note:** NeoForge runs biome_modifiers in phase order — ADD phase first, then REMOVE phase. Our remove targets `#minecraft:is_overworld` which **includes** the add target biome (e.g., `minecraft:badlands` is in the overworld tag). So the remove will strip the ore even from where we just added it. Per stock-modifier semantics, the most likely outcome of this exact pattern is **no ores anywhere**, not "ores only in target."
+**Phase ordering note:** NeoForge runs biome_modifiers in phase order - ADD phase first, then REMOVE phase. Our remove targets `#minecraft:is_overworld` which **includes** the add target biome (e.g., `minecraft:badlands` is in the overworld tag). So the remove will strip the ore even from where we just added it. Per stock-modifier semantics, the most likely outcome of this exact pattern is **no ores anywhere**, not "ores only in target."
 
 That's still useful diagnostic. The four possible outcomes:
 
@@ -46,7 +46,7 @@ For each ore, navigate to a chunk in **both** the target biome and a non-target 
 - **Diamond:** `/locate biome minecraft:badlands` → tp there, dig at y=-30 to y=0. Then tp to a non-badlands biome at the same y range.
 - **Lapis:** `/locate biome minecraft:jungle` vs anywhere else, y=-32 to y=32.
 - **Redstone:** `/locate biome minecraft:taiga` vs anywhere else, y=-64 to y=0.
-- **Amethyst geode:** `/locate biome minecraft:swamp` vs anywhere else. Geodes are larger and clustered — often visible at the surface or via cave openings; can also `/locate structure` if there's a corresponding structure tag, otherwise fly underground from y=0 down.
+- **Amethyst geode:** `/locate biome minecraft:swamp` vs anywhere else. Geodes are larger and clustered - often visible at the surface or via cave openings; can also `/locate structure` if there's a corresponding structure tag, otherwise fly underground from y=0 down.
 
 ## What this pack deliberately does NOT include
 

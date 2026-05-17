@@ -33,8 +33,8 @@ VILLAGER_IDS = frozenset(
 )
 
 # Pool ID substrings that indicate a structure generates villagers procedurally.
-# Villages don't bake villager entities into NBT — the engine spawns them at
-# worldgen time — so we can't detect them by scanning NBT entities alone.
+# Villages don't bake villager entities into NBT - the engine spawns them at
+# worldgen time - so we can't detect them by scanning NBT entities alone.
 _VILLAGE_POOL_HINTS = frozenset({"village/", "village_", "/village"})
 
 # Structure resource ID substrings that imply villager generation even without
@@ -291,7 +291,7 @@ def resolve_entities_all(idx: Indices, _nbt_cache: dict, progress: dict | None =
 
         for jar_path, piece_ids in jar_to_pieces.items():
             if jar_path is None:
-                # Datapack files — read directly from disk
+                # Datapack files - read directly from disk
                 for pid in piece_ids:
                     ref = idx.nbt[pid]
                     try:

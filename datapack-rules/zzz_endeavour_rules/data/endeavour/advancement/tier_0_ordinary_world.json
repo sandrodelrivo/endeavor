@@ -1,29 +1,28 @@
 {
-    "parent": "endeavour:base",
     "criteria": {
-        "exists": {
-            "trigger": "minecraft:tick"
+        "root": {
+            "trigger": "minecraft:impossible"
         }
     },
     "display": {
-        "description": "You wake. The world that was — is gone.",
+        "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
+        "description": "The world is disconnected, dangerous, and dead. The journey is yours.",
         "frame": "task",
         "icon": {
             "count": 1,
-            "id": "minecraft:grass_block"
+            "id": "minecraft:compass"
         },
-        "title": "The Ordinary World",
-        "show_toast": true,
-        "announce_to_chat": true,
+        "title": "Endeavour",
+        "show_toast": false,
+        "announce_to_chat": false,
         "hidden": false
     },
     "requirements": [
         [
-            "exists"
+            "root"
         ]
     ],
     "rewards": {
-        "experience": 10,
         "function": "endeavour:give_codex"
     }
 }

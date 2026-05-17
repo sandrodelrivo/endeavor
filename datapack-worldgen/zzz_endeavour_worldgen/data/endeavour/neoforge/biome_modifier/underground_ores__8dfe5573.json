@@ -24,8 +24,7 @@
     "wythers:ores/ore_diamond_volcanic",
     "create_new_age:thorium_ore",
     "createnuclear:lead_ore",
-    "immersiveengineering:silver",
-    "immersivepetroleum:reservoir"
+    "immersiveengineering:silver"
   ],
   "step": "underground_ores"
 }

@@ -244,7 +244,7 @@ async function selectStructure(id) {
 function _buildPieceList(pieces, startPieces) {
   // startPieces: Set of top-level start-pool pieces (bolded in list)
   piecesList.innerHTML = "";
-  pieceSelect.innerHTML = `<option value="">— select piece —</option>`;
+  pieceSelect.innerHTML = `<option value="">- select piece -</option>`;
 
   for (const piece of pieces) {
     const isStart = startPieces.has(piece);
@@ -291,7 +291,7 @@ function renderInfoPanel(d, { skipAutoLoad = false } = {}) {
     entityList.appendChild(li);
   }
 
-  // NBT pieces — prefer all_pieces (full BFS) over top-level pieces when available
+  // NBT pieces - prefer all_pieces (full BFS) over top-level pieces when available
   const displayPieces = (d.all_pieces && d.all_pieces.length > 0) ? d.all_pieces : d.pieces;
   const startSet = new Set(d.pieces);
 

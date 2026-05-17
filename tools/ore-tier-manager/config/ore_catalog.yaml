@@ -77,9 +77,6 @@ immersiveengineering:
   - immersiveengineering:deep_nickel
   - immersiveengineering:uranium
 
-immersivepetroleum:
-  - immersivepetroleum:reservoir
-
 # --- Intentionally NOT in the catalog (left in biome JSONs) ---
 #
 # Stone / dirt / disk blobs (terrain, not resources):

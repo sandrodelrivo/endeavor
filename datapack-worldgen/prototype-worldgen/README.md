@@ -1,6 +1,6 @@
 # prototype-toroidal-noise
 
-Working prototype of the climate gradient. Overrides only `temperature` and `vegetation` inside the vanilla overworld noise router. Requires the [More Density Functions (`moredfs`)](https://modrinth.com/mod/more-density-functions) library mod for the position and trig primitives — pure 1.21.1 vanilla has no density function that reads world X or Z.
+Working prototype of the climate gradient. Overrides only `temperature` and `vegetation` inside the vanilla overworld noise router. Requires the [More Density Functions (`moredfs`)](https://modrinth.com/mod/more-density-functions) library mod for the position and trig primitives - pure 1.21.1 vanilla has no density function that reads world X or Z.
 
 ## What it is
 
@@ -24,30 +24,30 @@ temperature(x, z) = clamp(z / 25000, -1, 1)            + 0.2 · vanilla_temperat
 vegetation (x, z) = sin( 2π · x / 6000 ) ^ 7           + 0.2 · vanilla_vegetation_noise
 ```
 
-Both wrapped in `minecraft:flat_cache` (matches vanilla's pattern for `continents` — caches per 4×4 column, no precision loss for biome selection).
+Both wrapped in `minecraft:flat_cache` (matches vanilla's pattern for `continents` - caches per 4×4 column, no precision loss for biome selection).
 
 ### Temperature is a clamped linear ramp (permafrost / permadesert vibe)
 
 | z position | T value | meaning |
 |-----------:|--------:|---------|
-| 0 | 0 | spawn — temperate |
-| ±3,000 | ±0.12 | edge of green band — temperate biomes still dominate |
+| 0 | 0 | spawn - temperate |
+| ±3,000 | ±0.12 | edge of green band - temperate biomes still dominate |
 | ±10,000 | ±0.4 | mostly cold / mostly warm biomes |
-| ±25,000 | ±1.0 | clamp wall — permafrost ice / permadesert sand |
-| beyond ±25,000 | ±1.0 | infinite extreme — same as the wall |
+| ±25,000 | ±1.0 | clamp wall - permafrost ice / permadesert sand |
+| beyond ±25,000 | ±1.0 | infinite extreme - same as the wall |
 
-`-z` (north) is cold, `+z` (south) is hot. Symmetric — both sides hit walls at 25k.
+`-z` (north) is cold, `+z` (south) is hot. Symmetric - both sides hit walls at 25k.
 
 ### Vegetation is a 7th-power sinusoid (mid-humidity dominates, narrow extreme bands)
 
-`sin^7(x)` is near 0 for most of its domain — only briefly spikes to ±1 near the sin peaks. So most of the world has moderate humidity (where biome variety lives) with narrow bands of extreme wet (jungle / swamp) and extreme dry (badlands-flavor) every half-period.
+`sin^7(x)` is near 0 for most of its domain - only briefly spikes to ±1 near the sin peaks. So most of the world has moderate humidity (where biome variety lives) with narrow bands of extreme wet (jungle / swamp) and extreme dry (badlands-flavor) every half-period.
 
 | x position | V value | meaning |
 |-----------:|--------:|---------|
-| 0 | 0 | spawn — mid-humidity |
+| 0 | 0 | spawn - mid-humidity |
 | ±750 | ~±0.1 | still mostly mid |
 | ±1500 | ±1.0 | narrow extreme peak |
-| ±3000 | 0 | half period — back to mid |
+| ±3000 | 0 | half period - back to mid |
 | ±4500 | ∓1.0 | next extreme peak (sign-flipped) |
 | ±6000 | 0 | full period |
 
@@ -119,8 +119,8 @@ Both axes have `0.2 · vanilla_shifted_noise` added. The vanilla `minecraft:temp
 
 | Knob | Default | Where to find it | Effect |
 |------|---------|------------------|--------|
-| `PERMA_DIST` (T wall distance) | `25000` | `temperature.argument.argument1.input.argument1` — the `0.00004` constant. Set to `1 / new_distance`. | Smaller → walls closer to spawn. |
-| `VEG_PERIOD` (V full period) | `6000` | `vegetation.argument.argument1.base.argument.argument1` — the `0.001047…` constant. Set to `2π / new_period`. | Smaller → tighter wet/dry bands. |
+| `PERMA_DIST` (T wall distance) | `25000` | `temperature.argument.argument1.input.argument1` - the `0.00004` constant. Set to `1 / new_distance`. | Smaller → walls closer to spawn. |
+| `VEG_PERIOD` (V full period) | `6000` | `vegetation.argument.argument1.base.argument.argument1` - the `0.001047…` constant. Set to `2π / new_period`. | Smaller → tighter wet/dry bands. |
 | `SIN_ORDER` (V shaping) | `7` | `vegetation.argument.argument1.exponent`. **Must be odd** to preserve sign of negative half-cycles. | Higher → narrower extreme peaks, wider mid zones. |
 | `NOISE_BLUR` | `0.2` | The `0.2` constant in `argument2.argument1` of both `temperature` and `vegetation`. | Higher → more wobble, fuzzier band boundaries. |
 
@@ -138,8 +138,8 @@ map.jacobsjo.eu doesn't evaluate `moredfs:*` types (it's a vanilla-only JS reimp
 
 ## Sources
 
-- [Minecraft Wiki — Pack format](https://minecraft.wiki/w/Pack_format) — pack_format 48 for 1.21.1
-- [Minecraft Wiki — Density function](https://minecraft.wiki/w/Density_function) — vanilla `clamp`, `flat_cache`, `mul`, `add`, `shifted_noise` schemas
-- [misode/mcmeta `1.21.1-data` — overworld.json](https://github.com/misode/mcmeta/blob/1.21.1-data/data/minecraft/worldgen/noise_settings/overworld.json) — vanilla baseline used directly
-- [misode/mcmeta `1.21.1-data` — overworld/continents.json](https://github.com/misode/mcmeta/blob/1.21.1-data/data/minecraft/worldgen/density_function/overworld/continents.json) — vanilla `flat_cache` pattern reference
-- [More Density Functions wiki — full type list](https://github.com/klinbee/More-Density-Functions/wiki) — `moredfs:x`, `moredfs:z`, `moredfs:sin`, `moredfs:power`
+- [Minecraft Wiki - Pack format](https://minecraft.wiki/w/Pack_format) - pack_format 48 for 1.21.1
+- [Minecraft Wiki - Density function](https://minecraft.wiki/w/Density_function) - vanilla `clamp`, `flat_cache`, `mul`, `add`, `shifted_noise` schemas
+- [misode/mcmeta `1.21.1-data` - overworld.json](https://github.com/misode/mcmeta/blob/1.21.1-data/data/minecraft/worldgen/noise_settings/overworld.json) - vanilla baseline used directly
+- [misode/mcmeta `1.21.1-data` - overworld/continents.json](https://github.com/misode/mcmeta/blob/1.21.1-data/data/minecraft/worldgen/density_function/overworld/continents.json) - vanilla `flat_cache` pattern reference
+- [More Density Functions wiki - full type list](https://github.com/klinbee/More-Density-Functions/wiki) - `moredfs:x`, `moredfs:z`, `moredfs:sin`, `moredfs:power`

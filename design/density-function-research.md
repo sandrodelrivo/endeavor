@@ -1,10 +1,10 @@
-# Density Function Research — Toroidal Climate Gradient
+# Density Function Research - Toroidal Climate Gradient
 
 ## The goal
 
 Make the world have directional climate. North is cold, south is warm. East is wet, west is dry. Loops toroidally so there are no hard edges.
 
-This is not a vanilla Minecraft feature. Vanilla `temperature` and `humidity` are 2D Perlin-style noise — random and isotropic. We override them with functions that are mostly directional gradient, with some noise mixed in so biome boundaries aren't perfect horizontal stripes.
+This is not a vanilla Minecraft feature. Vanilla `temperature` and `humidity` are 2D Perlin-style noise - random and isotropic. We override them with functions that are mostly directional gradient, with some noise mixed in so biome boundaries aren't perfect horizontal stripes.
 
 ## Where this lives in worldgen
 
@@ -16,7 +16,7 @@ data/minecraft/worldgen/noise_settings/overworld.json
 
 Inside that file, the `noise_router` object has fields including `temperature`, `vegetation` (humidity), `continents`, `erosion`, `weirdness`, `depth`, etc. Each is a density function.
 
-We override `temperature` and `vegetation` with our toroidal versions. We leave `continents`, `erosion`, `weirdness`, `depth` alone — those handle continent shapes, mountain placement, and extreme-biome rarity. Toroidal climate composes on top.
+We override `temperature` and `vegetation` with our toroidal versions. We leave `continents`, `erosion`, `weirdness`, `depth` alone - those handle continent shapes, mountain placement, and extreme-biome rarity. Toroidal climate composes on top.
 
 ## The math
 
@@ -61,7 +61,7 @@ Pseudo-structure:
 }
 ```
 
-The `xz_scale` of 0.0001 makes the noise vary very slowly across the world — at our scale of 25k, one full noise cycle is ~10k blocks. This isn't strictly periodic but at our world size it visually reads as "north is cold, south is warm" because the player only experiences part of one cycle.
+The `xz_scale` of 0.0001 makes the noise vary very slowly across the world - at our scale of 25k, one full noise cycle is ~10k blocks. This isn't strictly periodic but at our world size it visually reads as "north is cold, south is warm" because the player only experiences part of one cycle.
 
 **Problem with A:** noise is not actually periodic. It's just slow. At a world border 30k away from spawn, "north" and "extra-far north" may both be at high temperature because the noise peaked. Acceptable trade-off if we accept some randomness in the gradient.
 
@@ -69,13 +69,13 @@ The `xz_scale` of 0.0001 makes the noise vary very slowly across the world — a
 
 The `spline` density function takes a 1D input and maps it through piecewise-linear segments. We can construct a triangle wave (sawtooth-like) by using world Z as input mapped through a spline that goes 0 → 1 → 0 → -1 → 0 over its range.
 
-But splines need a finite domain — they don't loop. To get a true loop, we'd need to apply modulo first, and there's no `mod` primitive.
+But splines need a finite domain - they don't loop. To get a true loop, we'd need to apply modulo first, and there's no `mod` primitive.
 
 **Approach B is harder than A and produces sharper transitions.** Defer.
 
 ### Approach C: pre-baked noise via shifted_noise scaling
 
-We can scale a single noise sample to create something approximately periodic at our world scale. The trick: pick `xz_scale` very carefully. If `xz_scale = 0.0002`, one full noise oscillation is ~5k blocks. At a 25k world that's ~5 oscillations. Not a clean N-S gradient — just a banded climate.
+We can scale a single noise sample to create something approximately periodic at our world scale. The trick: pick `xz_scale` very carefully. If `xz_scale = 0.0002`, one full noise oscillation is ~5k blocks. At a 25k world that's ~5 oscillations. Not a clean N-S gradient - just a banded climate.
 
 This is *worse* than A.
 
@@ -99,7 +99,7 @@ Before integrating into the full datapack:
 
 - That overriding the overworld noise settings doesn't break Terralith, Continents, or WWOO. They may also override these files. Test the load order.
 - That setting `xz_scale` very low doesn't produce numerical issues (NaN, infinite, etc.).
-- That the `shift_z` parameter works the way we expect in 1.21.1 — the schema has changed across versions.
+- That the `shift_z` parameter works the way we expect in 1.21.1 - the schema has changed across versions.
 
 ## Fallback if it doesn't work
 

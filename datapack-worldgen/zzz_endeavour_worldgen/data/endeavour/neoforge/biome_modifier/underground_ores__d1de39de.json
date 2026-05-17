@@ -16,8 +16,7 @@
     "create_new_age:thorium_ore",
     "immersiveengineering:bauxite",
     "immersiveengineering:nickel",
-    "immersiveengineering:deep_nickel",
-    "immersivepetroleum:reservoir"
+    "immersiveengineering:deep_nickel"
   ],
   "step": "underground_ores"
 }

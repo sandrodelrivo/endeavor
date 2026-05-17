@@ -2,9 +2,9 @@
 Downloads and caches Minecraft 1.21.1 texture assets from mcmeta.
 
 Cached to tools/structure-manager/cache/:
-  atlas.png           — full block texture atlas image
-  uvmap.json          — {texture_id: [u_norm, v_norm, u2_norm, v2_norm]}  (0–1 range)
-  block_textures.json — {block_id: texture_id} resolved via block state + model chain
+  atlas.png           - full block texture atlas image
+  uvmap.json          - {texture_id: [u_norm, v_norm, u2_norm, v2_norm]}  (0–1 range)
+  block_textures.json - {block_id: texture_id} resolved via block state + model chain
 """
 
 from __future__ import annotations
@@ -92,7 +92,7 @@ def ensure_uvmap() -> dict[str, list[float]]:
 
 
 # ---------------------------------------------------------------------------
-# Block textures — resolved via block state + model chain
+# Block textures - resolved via block state + model chain
 # ---------------------------------------------------------------------------
 
 def ensure_block_textures(uvmap: dict) -> dict[str, str]:
@@ -235,7 +235,7 @@ def _collect_textures(model_id: str, models: dict) -> dict[str, str]:
         model = models.get(mid)
         if not model:
             return
-        # Child textures take priority over parent — only add if key not yet set
+        # Child textures take priority over parent - only add if key not yet set
         for k, v in model.get("textures", {}).items():
             if k not in textures:
                 textures[k] = v

@@ -9,7 +9,7 @@ any non-Windows host.
 This script walks each datapack source directory and rebuilds the
 matching .zip with normalized POSIX paths.
 
-Run from anywhere — paths are resolved relative to the repo root:
+Run from anywhere - paths are resolved relative to the repo root:
 
     python tools/rezip_datapacks.py
 """

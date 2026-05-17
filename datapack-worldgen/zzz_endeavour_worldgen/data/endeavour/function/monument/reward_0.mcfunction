@@ -1,0 +1,1 @@
+tellraw @a [{"text":"[ Monument ] ","color":"gold","bold":true},{"text":"The bar is full. The ground shifts once - not a tremor. More like something exhaling. Whatever runs beneath this place, it is satisfied. For now.","color":"white"}]

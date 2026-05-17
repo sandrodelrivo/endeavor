@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "active=false": { "model": "endeavour:block/tribute_altar" },
+    "active=true":  { "model": "endeavour:block/tribute_altar" }
+  }
+}

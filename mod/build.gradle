@@ -11,7 +11,7 @@ base {
 }
 
 // Mojang ships Java 21 with 1.21.x. Toolchain auto-provisions if the local JDK
-// doesn't match — see settings.gradle for the foojay resolver plugin.
+// doesn't match - see settings.gradle for the foojay resolver plugin.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
@@ -107,7 +107,7 @@ tasks.named('compileJava').configure {
     dependsOn 'setupCompileLibs'
 }
 
-// Token replacement for neoforge.mods.toml — values come from gradle.properties.
+// Token replacement for neoforge.mods.toml - values come from gradle.properties.
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
             minecraft_version      : minecraft_version,

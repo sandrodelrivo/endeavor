@@ -1,0 +1,24 @@
+{
+  "name": "The Black Seeps",
+  "category": "endeavour:world",
+  "icon": "createdieselgenerators:crude_oil_bucket",
+  "sortnum": 2,
+  "advancement": "endeavour:tier_4_dry",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "The Black Seeps",
+      "text": "The far deserts hold a secret.$(br2)Under the ashen savanna, under the bryce spires, under the gravel flats where nothing grows - something ancient pooled and stayed. The civilization that came before knew how to find it. Their smokestacks still rust in the sand.$(br2)Oil. Crude, black, and heavy. You did not come this far for scenery."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Survey First",
+      "text": "Not every chunk holds it. Most do not.$(br2)Craft an $(thing)Oil Scanner$(). Right-click in any chunk to read the deposit below. The number is in millibuckets - anything above $(c)10,000,000 mB$() is effectively inexhaustible. Anything below $(c)4,000,000 mB$() is dry ground.$(br2)Walk the survey grid before you build. A Pumpjack bolted to a dry chunk is a monument to impatience, and you are a long way from home."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Pump, Crack, Burn",
+      "text": "A $(thing)Pumpjack$() draws crude oil up. It needs rotational force - bring your gearing, or build it here.$(br2)Crude oil is not fuel. Run it through a $(thing)Distillation Tank$() to crack it: diesel, petrol, lubricant.$(br2)$(thing)Diesel$() feeds a $(thing)Diesel Engine$(). More stress than any brass-age machine. Cleaner than nothing.$(br2)This is what the expedition was for."
+    }
+  ]
+}

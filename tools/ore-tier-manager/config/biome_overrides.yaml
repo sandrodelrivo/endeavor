@@ -104,7 +104,6 @@
 '#endeavour:tier_4_dry':
   underground_ores:
     '@add':
-    - immersivepetroleum:reservoir
     - create_new_age:thorium_ore
 '#endeavour:tier_4_wet':
   underground_ores:

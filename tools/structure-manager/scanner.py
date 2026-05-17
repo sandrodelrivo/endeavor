@@ -246,7 +246,7 @@ def build_index() -> Indices:
     """Scan everything and return a fully resolved index."""
     idx = Indices()
 
-    # 1. Vanilla client-extra JAR — provides all vanilla pools and NBT files.
+    # 1. Vanilla client-extra JAR - provides all vanilla pools and NBT files.
     #    Must be scanned first so mods can override any of its entries.
     vanilla_jar = _find_vanilla_jar()
     if vanilla_jar:

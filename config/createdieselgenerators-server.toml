@@ -1,0 +1,5 @@
+["Server Configs"."Oil Config"]
+	#Disable normal oil chunks
+	"Disable normal oil chunks" = true
+	#Disable high oil chunks
+	"Disable high oil chunks" = false

@@ -1,0 +1,35 @@
+{
+    "parent": "endeavour:tier_4_road_of_trials",
+    "criteria": {
+        "reached": {
+            "conditions": {
+                "player": {
+                    "location": {
+                        "biomes": "#endeavour:tier_4_dry"
+                    }
+                }
+            },
+            "trigger": "minecraft:location"
+        }
+    },
+    "display": {
+        "description": "Reach the far deserts and badlands.",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:red_sand"
+        },
+        "title": "The Ashen Country",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "reached"
+        ]
+    ],
+    "rewards": {
+        "experience": 150
+    }
+}

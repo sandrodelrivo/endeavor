@@ -4,7 +4,7 @@ A heavily-modded Minecraft 1.21.1 NeoForge server for ~6 friends. Cooperative. L
 
 ## The premise
 
-The world was rich. The world is dead. We are the only intelligent creatures left. Across the bones of a vanished civilization — ruined waystones at old crossroads, vast dungeons with no quest-givers to point the way — we rebuild. The world is large, hostile, and slow. Distance is the central design constraint, and every system reinforces it. Cooperation is not nudged; it is structurally required. A lone wolf can survive, but the team will always reach the next era first.
+The world was rich. The world is dead. We are the only intelligent creatures left. Across the bones of a vanished civilization - ruined waystones at old crossroads, vast dungeons with no quest-givers to point the way - we rebuild. The world is large, hostile, and slow. Distance is the central design constraint, and every system reinforces it. Cooperation is not nudged; it is structurally required. A lone wolf can survive, but the team will always reach the next era first.
 
 The factory grows. The map shrinks. We climb.
 
@@ -12,7 +12,7 @@ The factory grows. The map shrinks. We climb.
 
 1. **The world is disconnected.** Strong, opinionated worldgen. Resources are biome-locked. Progression requires long-haul logistics across multiple distant biomes. No single base can cover the tech tree alone.
 2. **The factory will grow.** Multi-block industrial complexity is the central engagement loop. Five tiers, each with a peak moment.
-3. **The player is slow.** Sprint is removed. Every transport tier — horse, cart, boat, ship, dirigible, train — has a niche where it dominates. None is strictly best.
+3. **The player is slow.** Sprint is removed. Every transport tier - horse, cart, boat, ship, dirigible, train - has a niche where it dominates. None is strictly best.
 4. **The world is dangerous.** No respawn point. Death sends to world spawn. Mobs scale with distance from spawn, with visual tells. Adventuring far is a real expedition.
 5. **The world was rich.** Adventuring rewards are real. Dungeons hold serious loot. The dead civilization left infrastructure (waystones) scattered across the world.
 6. **The world is dead.** No villagers, no trades. Ruined villages exist as scenery and loot. Piglin brutes can stay; trading does not. The only intelligent agents are the players.
@@ -20,9 +20,9 @@ The factory grows. The map shrinks. We climb.
 
 ## Aeronautics is the logistics layer
 
-The mod stack centers on Create + Aeronautics, but Aeronautics is not a tier gate. It's the parallel horizontal capability that connects the disconnected world. Steel-and-petroleum-and-uranium gate progression. Airships and dirigibles are how players bring those resources together across hostile geography.
+The mod stack centers on Create + Aeronautics, but Aeronautics is not a tier gate. It's the parallel horizontal capability that connects the disconnected world. Steel-and-oil-and-uranium gate progression. Airships and dirigibles are how players bring those resources together across hostile geography.
 
-Big iron veins live in distant biomes. Petroleum reservoirs live elsewhere. Uranium lives in extreme biomes. Players must build airborne logistics — and rail, and shipping — to connect them. That's the design.
+Big iron veins live in distant biomes. Oil reservoirs live elsewhere. Uranium lives in extreme biomes. Players must build airborne logistics - and rail, and shipping - to connect them. That's the design.
 
 ## The world
 
@@ -43,7 +43,7 @@ Recipes stay near vanilla per their mods. The challenge is the world, not recipe
 | T2 | Brass Age | Zinc → brass. Mesa-family expedition. | First mechanical farm running unattended |
 | T3 (entry) | Nether | Find a prebuilt ruined nether portal. Crafting disabled. | Crossing the threshold |
 | T3 (steel) | Steel Age | IE Coke Oven + Blast Furnace. Big iron veins biome-locked to distant biomes. | First long-haul airship cargo run |
-| T3 (petroleum) | Industrial | Crude oil reservoirs. | First petroleum pipeline online |
+| T3 (oil) | Industrial | Crude oil reservoirs. | First oil pipeline online |
 | T4 | Atomic | Uranium biome-locked to extreme biomes. | First reactor critical |
 | T5 | Beyond | Aether dimension. Elytra unlocks. | Whatever the group decides |
 
@@ -57,7 +57,7 @@ The grind peak should land in late T3. After that, T4 → T5 is the victory lap.
 - Elytra disabled until T5 advancement.
 - Horses become real. Speed-bred horses are a genuine T1 priority.
 
-### Transport tiers (parallel — none dominates)
+### Transport tiers (parallel - none dominates)
 
 | Mode | Throughput | Infrastructure | Range | Niche |
 |------|-----------|----------------|-------|-------|
@@ -97,11 +97,11 @@ Implementation via Waystones (BlayTheNinth) + custom `warpRequirements` config +
 
 ## Survival layer
 
-- Seasons (Ecliptic Seasons) — 24 solar terms across 4 seasons. Accumulating snow on dirt/grass/leaves/rooftops in cold terms, regional rainfall by biome, foggy weather, biome color shifts. KubeJS bindings exposed.
-- Thirst + temperature (Homeostatic) — drink water, wear appropriate clothing for biome. Wet-bulb globe temperature math, body temp regulation via armor insulation.
-- Ecliptic→Homeostatic bridge — KubeJS script applies global temperature offset to Homeostatic based on current solar term. Without this, Homeostatic temperature stays seasonally flat.
-- Torch burnout — configurable burn time, optional re-ignition with flint and steel.
-- Better farming (Farmer's Delight) — meaningful engagement track for non-Create-pilled players.
+- Seasons (Ecliptic Seasons) - 24 solar terms across 4 seasons. Accumulating snow on dirt/grass/leaves/rooftops in cold terms, regional rainfall by biome, foggy weather, biome color shifts. KubeJS bindings exposed.
+- Thirst + temperature (Homeostatic) - drink water, wear appropriate clothing for biome. Wet-bulb globe temperature math, body temp regulation via armor insulation.
+- Ecliptic→Homeostatic bridge - KubeJS script applies global temperature offset to Homeostatic based on current solar term. Without this, Homeostatic temperature stays seasonally flat.
+- Torch burnout - configurable burn time, optional re-ignition with flint and steel.
+- Better farming (Farmer's Delight) - meaningful engagement track for non-Create-pilled players.
 
 ## Adventure layer
 

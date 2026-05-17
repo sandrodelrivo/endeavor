@@ -14,7 +14,7 @@ import java.util.Optional;
 // Players cannot create their own nether portals. The only way into the nether
 // is through a prebuilt portal placed by worldgen near spawn (see the worldgen
 // datapack's placed_features). Returning Optional.empty() here makes
-// BaseFireBlock.onPlace skip portal creation for any fire source — flint and
+// BaseFireBlock.onPlace skip portal creation for any fire source - flint and
 // steel, fire charge, lightning (including lightning rod farms), or anything
 // else that drops a fire block into an obsidian frame.
 //

@@ -29,7 +29,7 @@ import java.util.Set;
  * <p>Why this exists: stock NeoForge has {@code add_features} (Phase.ADD) and
  * {@code remove_features} (Phase.REMOVE). Combining them to "move feature from
  * biome group A to subset B" doesn't work because Phase.ADD always runs before
- * Phase.REMOVE — any add to a biome inside #is_overworld also gets stripped by
+ * Phase.REMOVE - any add to a biome inside #is_overworld also gets stripped by
  * the subsequent remove targeting #is_overworld. The clone-and-add workaround
  * (create a new placed feature and add it to B) creates feature ordering cycles
  * across biome packs (e.g. Terralith's mantle_caves orders diamond variants

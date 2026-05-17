@@ -50,7 +50,7 @@ def _resolve_entities_background(idx: Indices) -> None:
     cache_hit, fingerprint = load_entity_cache(idx)
     if cache_hit:
         n = len(idx.structures)
-        print(f"  Cache hit — loaded entity/piece data for {n} structures.")
+        print(f"  Cache hit - loaded entity/piece data for {n} structures.")
         _scan_progress["done"] = n
         _scan_progress["total"] = n
         _entities_ready = True

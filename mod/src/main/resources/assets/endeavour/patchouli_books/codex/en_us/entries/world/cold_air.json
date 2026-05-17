@@ -3,7 +3,7 @@
   "category": "endeavour:world",
   "icon": "minecraft:blue_ice",
   "sortnum": 1,
-  "advancement": "endeavour:tier_2_crossing_the_threshold",
+  "advancement": "endeavour:tier_4_cold",
   "pages": [
     {
       "type": "patchouli:text",

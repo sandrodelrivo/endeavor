@@ -6,8 +6,7 @@
     "minecraft:ore_coal_lower",
     "terralith:cave/fungal/ore_coal_extra",
     "wythers:ores/ore_coal_windswept",
-    "create_new_age:thorium_ore",
-    "immersivepetroleum:reservoir"
+    "create_new_age:thorium_ore"
   ],
   "step": "underground_ores"
 }

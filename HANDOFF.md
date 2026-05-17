@@ -7,16 +7,16 @@ Session-to-session continuity for Claude Code agents. Update this at the end of 
 Repo just scaffolded. Design phase complete. Implementation has not started.
 
 What exists:
-- `CLAUDE.md` — cold-start context
-- `design/design-doc.md` — full design
-- `design/tier-map.xlsx` — source of truth for biomes/resources/tiers
-- `design/mod-list.md` — active mods
-- `design/density-function-research.md` — research notes on the toroidal climate gradient
-- `design/open-questions.md` — pending decisions
-- `datapack-worldgen/pack.mcmeta` — empty pack scaffold
-- `datapack-rules/pack.mcmeta` — empty pack scaffold
-- `mod/` — empty directory tree, no gradle scaffold yet
-- `textures-source/` — placeholder for Jon's ore textures (pending Jon dropping them in)
+- `CLAUDE.md` - cold-start context
+- `design/design-doc.md` - full design
+- `design/tier-map.xlsx` - source of truth for biomes/resources/tiers
+- `design/mod-list.md` - active mods
+- `design/density-function-research.md` - research notes on the toroidal climate gradient
+- `design/open-questions.md` - pending decisions
+- `datapack-worldgen/pack.mcmeta` - empty pack scaffold
+- `datapack-rules/pack.mcmeta` - empty pack scaffold
+- `mod/` - empty directory tree, no gradle scaffold yet
+- `textures-source/` - placeholder for Jon's ore textures (pending Jon dropping them in)
 
 What does NOT exist yet:
 - Any density function JSON
@@ -29,7 +29,7 @@ What does NOT exist yet:
 ## Last decisions made
 
 - Aeronautics is the LOGISTICS LAYER, not a tier gate.
-- Tier ladder adopts Sandro's revised version: Vanilla → Create → Nether-via-prebuilt-portal → IE Steel → IE Petroleum → Create Nuclear → Aether.
+- Tier ladder adopts Sandro's revised version: Vanilla → Create → Nether-via-prebuilt-portal → IE Steel → Create Diesel → Create Nuclear → Aether.
 - Custom ores DROPPED as progression. Repurposed as 8 Patchouli quest-key lore items.
 - Mod scope shrunk to: book + advancements + lore items + portal-ignition-disable + recipe-disables.
 - No modifications to Aeronautics recipes.
@@ -45,9 +45,9 @@ Approach is sketched in `design/density-function-research.md`. Build a minimal d
 ## Open questions blocking work
 
 See `design/open-questions.md`. The blocking ones for next session:
-- Q1 (climate wavelength) — defaults to 20k, but worth confirming before locking the noise function
-- Q3 (distant-iron biomes) — need this list before writing biome modifiers
-- Q5 (nether portal force-spawn distance) — need this before writing the portal placed_feature
+- Q1 (climate wavelength) - defaults to 20k, but worth confirming before locking the noise function
+- Q3 (distant-iron biomes) - need this list before writing biome modifiers
+- Q5 (nether portal force-spawn distance) - need this before writing the portal placed_feature
 
 ## Notes on getting unstuck
 

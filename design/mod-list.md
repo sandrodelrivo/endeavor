@@ -3,17 +3,17 @@
 Minecraft 1.21.1, NeoForge. Active modlist below.
 
 Markers:
-- `*` — worldgen-changing mod
-- `[hard]` — load-bearing for the design; removing breaks core mechanics
-- `[opt]` — optional / aesthetic / QoL
-- `[lib]` — library, required by other mods
+- `*` - worldgen-changing mod
+- `[hard]` - load-bearing for the design; removing breaks core mechanics
+- `[opt]` - optional / aesthetic / QoL
+- `[lib]` - library, required by other mods
 
 ## Core gameplay
 
 | Mod | Role | Notes |
 |-----|------|-------|
 | Create | Foundation [hard] | Andesite/brass/steam progression |
-| Sable | Physics library [hard] | Required by Aeronautics. Intrusive — confirm compatibility per addon |
+| Sable | Physics library [hard] | Required by Aeronautics. Intrusive - confirm compatibility per addon |
 | Create: Aeronautics | Logistics layer [hard] | The mod the server is named for |
 | Aeronautics Camera Sync | Aeronautics camera follow [opt] | Aeronautics addon |
 | Exposure | Custom camera exposure [opt] | |
@@ -28,8 +28,8 @@ Markers:
 
 | Mod | Role | Notes |
 |-----|------|-------|
-| Immersive Engineering | Steel/petroleum core [hard] | T3 gate |
-| Immersive Petroleum | Crude oil + refining [hard] | T3 gate |
+| Immersive Engineering | Steel [hard] | T3 gate |
+| Create: Diesel | Crude oil + refining [hard] | T3 gate |
 | Create Nuclear | Reactors [hard] | T4 gate |
 | Create New Age | Advanced electrical [opt] | |
 
@@ -113,4 +113,4 @@ Markers:
 |-----|------|-------|
 | endeavour | Server-specific content [hard] | Patchouli book, advancements, lore items, ignition rules |
 | Patchouli | Data-driven guidebook [hard] | Required by `endeavour` |
-| Patchouli Library | Inventory quick-access for Patchouli books [opt] | QoL addon — adds inventory buttons to open installed Patchouli books |
+| Patchouli Library | Inventory quick-access for Patchouli books [opt] | QoL addon - adds inventory buttons to open installed Patchouli books |

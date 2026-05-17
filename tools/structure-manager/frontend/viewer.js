@@ -1,8 +1,8 @@
 /**
- * Three.js 3-D structure viewer — textured rendering using the Minecraft atlas.
+ * Three.js 3-D structure viewer - textured rendering using the Minecraft atlas.
  *
  * Exported API:
- *   renderStructure(data)  — data = {size, blocks:[{pos,type}]}
+ *   renderStructure(data)  - data = {size, blocks:[{pos,type}]}
  *   clearViewer()
  *   resetCamera()
  */
@@ -83,7 +83,7 @@ async function ensureAtlas() {
 // ── Block → texture name ───────────────────────────────────
 // Resolution order:
 //  1. Hard overrides for entity-rendered blocks (chests, campfires, etc.)
-//  2. _blockTextures map — resolved from Minecraft block state + model JSONs
+//  2. _blockTextures map - resolved from Minecraft block state + model JSONs
 //  3. Exact atlas lookup by "block/{name}"
 //  4. Hash-based fallback color
 
@@ -97,7 +97,7 @@ const BLOCK_TEXTURE_OVERRIDE = {
   "minecraft:soul_campfire":   "block/soul_campfire_fire",
   "minecraft:water":           "block/water_still",
   "minecraft:lava":            "block/lava_still",
-  // Renamed in 1.20.3 — blockstate file no longer exists under the old name
+  // Renamed in 1.20.3 - blockstate file no longer exists under the old name
   "minecraft:grass":           "block/short_grass",
 };
 
@@ -173,7 +173,7 @@ export async function renderStructure(data) {
   await ensureAtlas();
 
   document.getElementById("viewer-info").textContent =
-    `${blocks.length.toLocaleString()} blocks — loading textures…`;
+    `${blocks.length.toLocaleString()} blocks - loading textures…`;
 
   // Group blocks by type
   const byType = new Map();
@@ -212,7 +212,7 @@ export async function renderStructure(data) {
       geo = makeAtlasBoxGeo(u0, v0, u1, v1);
       mat = atlasMat;
     } else {
-      // Mod block or unmapped vanilla block — solid color fallback
+      // Mod block or unmapped vanilla block - solid color fallback
       geo = makeColorBoxGeo();
       mat = new THREE.MeshLambertMaterial({ color: fallbackColor(type) });
     }

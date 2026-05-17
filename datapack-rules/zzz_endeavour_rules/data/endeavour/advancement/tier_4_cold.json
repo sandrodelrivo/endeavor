@@ -1,0 +1,35 @@
+{
+    "parent": "endeavour:tier_4_road_of_trials",
+    "criteria": {
+        "reached": {
+            "conditions": {
+                "player": {
+                    "location": {
+                        "biomes": "#endeavour:tier_4_cold"
+                    }
+                }
+            },
+            "trigger": "minecraft:location"
+        }
+    },
+    "display": {
+        "description": "Reach the frozen frontier.",
+        "frame": "challenge",
+        "icon": {
+            "count": 1,
+            "id": "minecraft:ice"
+        },
+        "title": "The Long Winter",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "requirements": [
+        [
+            "reached"
+        ]
+    ],
+    "rewards": {
+        "experience": 150
+    }
+}

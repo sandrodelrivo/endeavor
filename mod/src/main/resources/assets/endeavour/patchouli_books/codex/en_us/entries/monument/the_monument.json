@@ -1,0 +1,19 @@
+{
+  "name": "The Monument",
+  "category": "endeavour:monument",
+  "icon": "minecraft:chiseled_stone_bricks",
+  "sortnum": 0,
+  "advancement": "minecraft:story/root",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "The Monument",
+      "text": "It was here before the roads. Before the ruined villages and the collapsed towers and the names carved into stones you cannot read.$(br2)You did not build it. You cannot move it. It stands at the center of the world and the ground has settled around it like an old wound - not healed. Closed.$(br2)Something about it is still running."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "The Footprint",
+      "text": "The monument claims a tract of ground. Thirty-five blocks in every direction from its center. Within that boundary, the air is different. Quieter. As though the place is paying attention.$(br2)Whatever mechanism drove this structure was not broken when the civilization that built it ended. It was not sabotaged. It was not abandoned in grief or panic.$(br2)It was simply left to wait. It has been waiting a long time."
+    }
+  ]
+}

@@ -54,13 +54,13 @@ How close to world spawn must we guarantee at least one ruined portal?
 - **Status:** Investigate KubeJS feasibility first.
 
 ### Q12. Companion mod: Java or KubeJS?
-- **Default:** Investigate KubeJS feasibility for all listed mod features (lore items, ignition cancel, recipe disables, advancement triggers). If all feasible, drop Java path entirely — the "mod" becomes scripts + textures + Patchouli book data.
+- **Default:** Investigate KubeJS feasibility for all listed mod features (lore items, ignition cancel, recipe disables, advancement triggers). If all feasible, drop Java path entirely - the "mod" becomes scripts + textures + Patchouli book data.
 - **Status:** Open. Resolve before any gradle scaffolding.
 
 ### Q13. Ecliptic → Homeostatic temperature bridge
 - **Default:** KubeJS script registers an Ecliptic season-change listener and applies a global temperature offset to Homeostatic via its API. Cold solar terms shift Homeostatic ambient temperature down; hot terms shift it up.
-- **Status:** Need to verify both mods expose what's needed. Both list KubeJS support — should be straightforward.
+- **Status:** Need to verify both mods expose what's needed. Both list KubeJS support - should be straightforward.
 
 ## Decided
 
-(empty for now — move locked items here as they get decided)
+(empty for now - move locked items here as they get decided)

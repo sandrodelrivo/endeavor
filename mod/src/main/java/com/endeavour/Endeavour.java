@@ -1,6 +1,9 @@
 package com.endeavour;
 
 import com.endeavour.config.EndeavourConfig;
+import com.endeavour.registry.EndeavourBlockEntities;
+import com.endeavour.registry.EndeavourBlocks;
+import com.endeavour.registry.EndeavourItems;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import net.neoforged.bus.api.IEventBus;
@@ -27,6 +30,9 @@ public class Endeavour {
 
     public Endeavour(IEventBus modEventBus, ModContainer modContainer) {
         BIOME_MODIFIER_SERIALIZERS.register(modEventBus);
+        EndeavourBlocks.BLOCKS.register(modEventBus);
+        EndeavourItems.ITEMS.register(modEventBus);
+        EndeavourBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, EndeavourConfig.SPEC);
         LOGGER.info("Endeavour mod loaded");
     }

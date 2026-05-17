@@ -1,0 +1,25 @@
+{
+  "name": "The Tribute Altar",
+  "category": "endeavour:monument",
+  "icon": "endeavour:tribute_altar",
+  "sortnum": 1,
+  "advancement": "minecraft:story/root",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "title": "The Tribute Altar",
+      "recipe": "endeavour:tribute_altar",
+      "text": "Cobblestone and a chest. It is not ornate. Place it within the monument's footprint and it will wake - the glow tells you. It will not glow anywhere else.$(br2)The monument accepts these altars. It expected them."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "What It Takes",
+      "text": "The altar is particular. Offer something it does not want and it will sit in your hopper untouched, patient as the thing it serves.$(br2)$(thing)Coal$(). The cheapest fire. $(c)One point$().$(br2)$(thing)Iron Ingot$(). The currency of the brass age. $(c)Two$().$(br2)$(thing)Gold Ingot$(). The currency of nothing. $(c)Three$().$(br2)$(thing)Diamond$(). $(c)Four$(). You know what diamonds cost.$(br2)Build the logistics. The monument is not in a hurry. You should be."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "The Bar",
+      "text": "There is a number. A bar. It fills.$(br2)You do not know yet what happens when it reaches the top. Neither did the people who built this place. But they kept feeding it - the ash-strata under the monument are old and deep, and they are full of burned offerings.$(br2)They got somewhere. They are gone now.$(br2)You are not them."
+    }
+  ]
+}
